@@ -25,10 +25,7 @@ var cdata;
   providedIn: 'root'
 })
 export class AppComponent implements OnInit {
-  
-  url = 'https://covid19-dashboard.ages.at/data/CovidFaelle_GKZ.csv';
 
-  
   
   constructor(private httpClient: HttpClient) { }
 
@@ -173,7 +170,7 @@ export class AppComponent implements OnInit {
         // Keine abdeckende Fläche sondern nur ein Balkon
         // ** ToDo - neues Konzept **
         var coordinates = [[47.84565,16.52327],[48.2999988,15.916663],[47.84565,16.52327],[47.0666664,16.3166654],[46.93848,16.14158],[47.73333,16.4],[47.94901,16.8417],[47.494970,16.508790],[47.28971,16.20595],[46.636460,14.312225],[46.61028,13.85583],[46.62722,13.36722]];
-        var speicher:[]=data.split("\n");
+        var speicher:string[]=data.split("\n");
         for (let i = 0; i < speicher.length && i < 12; i++){
             // bezirk daten werden durch ";" getrennt
             // [0] Bezirk, [1] GKZ, [2] AnzEinwohner, [3] Anzahl, [4] AnzahlTot, [5] AnzahlFaelle7Tage

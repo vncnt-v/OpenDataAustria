@@ -1,13 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { CSVReader } from "bower_components/angular-csv-import/dist/angular-csv-import.js"
 
-import * as Map from "./js/Map";
-import "./js/CoronaData";
 import Austria from '../assets/austria.json';
-//import {Corona} from '../assets/CovidFaelle_GKZ';
-import { Observable } from 'rxjs';
 
 
 import { Injectable } from '@angular/core';
@@ -19,7 +14,7 @@ declare global {
 }
 
 window.THREE = THREE;
-const covidData = [];
+var cdata;
 
 @Component({
   selector: 'app-root',
@@ -32,35 +27,22 @@ const covidData = [];
 export class AppComponent implements OnInit {
   
   url = 'https://covid19-dashboard.ages.at/data/CovidFaelle_GKZ.csv';
-  
-  //covidData: string[] = [];
+
   
   
   constructor(private httpClient: HttpClient) { }
 
   sendGetRequest() {
-    
-    return this.httpClient.get(this.url, {responseType: 'text'});
+    return this.httpClient.get('http://localhost:8000/corona',{responseType: 'text'});
   }
   
-  ngOnInit(): void {
+  async ngOnInit() {
 
-    var count=5;
     console.log(Austria);
     this.sendGetRequest().subscribe(data => {
-      const list = data.split('\n');
-      list.forEach( e => {
-        
-      covidData.push(e);
-      });
-      });
-      console.log(count);
-      console.log(covidData[0]);
-      console.log(covidData);
-      for(var covid of covidData)
-      {
-          console.log(covid);
-      }
+      cdata=data;
+
+
       
 
     // Make scene global
@@ -96,7 +78,6 @@ export class AppComponent implements OnInit {
         camera.updateProjectionMatrix();
     })
     render();
-    console.log(renderer);
     // Load Map von Map.js 
     loadMapData();
 
@@ -178,24 +159,25 @@ export class AppComponent implements OnInit {
         scene.add( mesh );
     }
     // Load Corona Data von CoronaData.js
-    initCoronaData(covidData);
+
+    initCoronaData(cdata);
     // Balken Farbe
     var m_coronaData = new THREE.MeshLambertMaterial( {color: 0x2194ce, transparent: true, opacity: 0.5, emissive: 0x7a2c2c} );
 
 
     function initCoronaData(data){
         // CovidFaelle_GKZ.csv bezirke durch Newlines getrennt
-        console.log(typeof(data));
-        console.log(data)
+        //console.log(data);
         //var bezirke = data.split('\n');
         // Provisorische Testung mit Koordinaten der ersten 12 Bezirke
         // Keine abdeckende Fläche sondern nur ein Balkon
         // ** ToDo - neues Konzept **
         var coordinates = [[47.84565,16.52327],[48.2999988,15.916663],[47.84565,16.52327],[47.0666664,16.3166654],[46.93848,16.14158],[47.73333,16.4],[47.94901,16.8417],[47.494970,16.508790],[47.28971,16.20595],[46.636460,14.312225],[46.61028,13.85583],[46.62722,13.36722]];
-        for (let i = 0; i < data.length && i < 12; i++){
+        var speicher:[]=data.split("\n");
+        for (let i = 0; i < speicher.length && i < 12; i++){
             // bezirk daten werden durch ";" getrennt
             // [0] Bezirk, [1] GKZ, [2] AnzEinwohner, [3] Anzahl, [4] AnzahlTot, [5] AnzahlFaelle7Tage
-            var bezirk = data[i].split(';');
+            var bezirk = speicher[i].split(';');
             visualizeEntry(coordinates[i][0],coordinates[i][1],bezirk[5]);
         }
         // **Test** Wien
@@ -217,8 +199,9 @@ export class AppComponent implements OnInit {
         scene.add(cube);
     }
 
-    
-  }
+});
+}
+  
   
 
 }

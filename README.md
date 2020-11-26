@@ -4,6 +4,7 @@
 ##### SetUp
 ```sh
 cd Front-End
+npm install
 ng serve --open
 ```
 

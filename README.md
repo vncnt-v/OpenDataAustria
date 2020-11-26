@@ -1,5 +1,12 @@
 # OpenDataAustria
 
+### Front-End
+##### SetUp
+```sh
+cd Front-End
+ng serve --open
+```
+
 ### Back-End
 ##### SetUp
 ```sh

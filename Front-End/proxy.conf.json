@@ -1,0 +1,10 @@
+{
+    "/map": {
+        "target": "http://localhost:8000",
+        "secure": false
+    },
+    "/corona": {
+        "target": "http://localhost:8000",
+        "secure": false
+    }
+  }

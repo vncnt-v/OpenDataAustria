@@ -18,6 +18,7 @@ export class RendererComponent implements OnInit {
     // Perspektivische Kamera mit einer Sichtweite von min 0.1 und max 10.000 sowie 50 als Krümmung der Perspektive
     var camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 0.1, 10000);
     camera.position.z = 300;
+    camera.position.y = -350;
     camera.lookAt( 0, 0, 0 );
     var renderer =  new THREE.WebGLRenderer({antialias: true});
     // Background

@@ -9,7 +9,8 @@ var deltaX = 730;
 var deltaY = 2600;
 var factor = 55;
 var scene;
-
+var maxData = 0;
+var skalierFaktor = 0;
 @Injectable({
   providedIn: 'root'
 })
@@ -33,16 +34,28 @@ export class CoronaService {
       // CovidFaelle_GKZ.csv bezirke durch Newlines getrennt
       var bezirke = data.split('\n');
       var coordinates = [[47.84565,16.52327],[48.2999988,15.916663],[47.84565,16.52327],[47.0666664,16.3166654],[46.93848,16.14158],[47.73333,16.4],[47.94901,16.8417],[47.494970,16.508790],[47.28971,16.20595],[46.636460,14.312225],[46.61028,13.85583],[46.62722,13.36722]];
-      for (var i = 0; i < bezirke.length && i < 12; i++){
+      //In einer Schleife den größten Wert finden
+      for (var i = 0; i < bezirke.length; i++){
           // bezirk daten werden durch ";" getrennt
           // [0] Bezirk, [1] GKZ, [2] AnzEinwohner, [3] Anzahl, [4] AnzahlTot, [5] AnzahlFaelle7Tage
           var bezirk = bezirke[i].split(';');
-          this.visualizeEntry(coordinates[i][0],coordinates[i][1],bezirk[dataID]);
-      }
-      // **Test** Wien
+          if(maxData <= parseInt(bezirk[dataID],10)){
+            maxData = bezirk[dataID];
+          }
+        }
+      //Maximale Größe definieren, hier: 100; skalierFaktor berechnen
+      skalierFaktor=100/maxData;
       var bezirk = bezirke[bezirke.length-1].split(';');
-      this.visualizeEntry(48.210033,16.363449,bezirk[dataID]);
-      // add to Scene
+      this.visualizeEntry(48.210033,16.363449,parseInt(bezirk[dataID],10)*skalierFaktor);
+      //Alle Werte visualisieren
+      for (var i = 0; i < bezirke.length && i < 12; i++){
+        // bezirk daten werden durch ";" getrennt
+        // [0] Bezirk, [1] GKZ, [2] AnzEinwohner, [3] Anzahl, [4] AnzahlTot, [5] AnzahlFaelle7Tage
+        var bezirk = bezirke[i].split(';');
+        this.visualizeEntry(coordinates[i][0],coordinates[i][1],parseInt(bezirk[dataID],10)*skalierFaktor);
+    }
+      // **Test** Wien
+       // add to Scene
       scene.add(assets);
   }
 

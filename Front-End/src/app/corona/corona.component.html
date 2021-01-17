@@ -1,0 +1,41 @@
+<app-renderer></app-renderer>
+<mat-accordion class="example-headers-align" multi>
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>menu</mat-icon>
+          </mat-panel-title>
+          <mat-panel-description>
+            Einstellungen
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        
+        <mat-form-field appearance="fill">
+          <mat-label>Datensatz</mat-label>
+          <mat-select [(value)]="selectedData" (selectionChange)="selectData($event)">
+            <mat-option [value]="option.value" *ngFor="let option of data">{{ option.viewValue }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <br>
+        <mat-slide-toggle [disabled]="disabled" (change)="scaleTo100000($event)">pro 100.000 Einwohner</mat-slide-toggle>
+        <br>
+        <br>
+        <mat-slide-toggle [checked]="checkedScala" (change)="toogleScala($event)">Skala einblenden</mat-slide-toggle>
+        <br>
+        <br>
+        <mat-slide-toggle [checked]="checkedAxes" (change)="toogleAxes($event)">Querschnitt einblenden</mat-slide-toggle>
+        <br>
+        <mat-slide-toggle [checked]="checkedFill" [disabled]="disabledAxesOptions" (change)="toggleFill($event)">Querschnitt füllen</mat-slide-toggle>
+        <br>
+        <br>
+        <p>Querschnitt:</p>
+        <mat-slider id="AxesSlider" min="0" max="500" [disabled]="disabledAxesOptions" [value]="100" (change)="sliderChanged($event)" (input)="sliderChange($event)"></mat-slider>
+  
+      </mat-expansion-panel>
+    </mat-accordion>
+    <a href="/">
+      <button mat-fab class="home-button">
+        <mat-icon class="white-icon">home</mat-icon>
+      </button>
+    </a>
+    

@@ -7,6 +7,10 @@ var m_bundesland = new THREE.LineBasicMaterial( {color: 0xDE1232,});
 var m_bundeslandAxes = new THREE.LineBasicMaterial( {color: 0x777777 });
 var m_bundeslandAxesFilled = new THREE.MeshLambertMaterial( {color: 0x000000 });
 var m_scala = new THREE.LineDashedMaterial( {color: 0x777777, scale: 1.1, dashSize: 4.5, gapSize: 4.5,});
+var m_lables = [
+  new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, emissive: 0xffffff } ), // front
+  new THREE.MeshPhongMaterial( { color: 0xffffff, emissive: 0xffffff} ) // side
+];
 var deltaX = 730;
 var deltaY = 2600;
 var factor = 55;
@@ -15,6 +19,10 @@ var axes = new THREE.Group();
 var axes_filled = new THREE.Group();
 var scala = new THREE.Group();
 var axes_scala = new THREE.Line();
+var lables = new THREE.Group();
+var axes_lable;
+var maxValue;
+var currentZ = 125;
 
 @Injectable({
   providedIn: 'root'
@@ -64,7 +72,7 @@ export class MapService {
     this.drawZeroScala();
     this.drawNormalScala();
     this.drawMiniScala();
-    scala.visible = false;
+    scala.visible = true;
     axes.add(axes_filled);
     // ToDo
     // Übereinstimmung mit UI Slider
@@ -110,7 +118,7 @@ export class MapService {
   // Null Linie (z = 0) ist länger
   drawZeroScala(){
     var points = [];
-    points.push(new THREE.Vector2(9.5*factor-deltaX,49*factor-deltaY));
+    points.push(new THREE.Vector2(9.5*factor-deltaX,48.85*factor-deltaY));
     points.push(new THREE.Vector2(9.5*factor-deltaX,46.35*factor-deltaY));
     points.push(new THREE.Vector2(17*factor-deltaX,46.35*factor-deltaY));
     this.drawScala(points,0);
@@ -162,8 +170,11 @@ export class MapService {
 
   // Setzt den Querschnitt auf z Koordinate
   static setAxes(value){
+    axes_scala.remove(axes_lable);
+    //this.createAxesLabel(value);
     axes.position.z = (value/100*(400/(500/100)));
     axes_scala.position.z = (value/100*(400/(500/100)));
+    currentZ = value;
     if (value <= 0){
         axes.visible = false;
         axes_scala.visible = false;
@@ -179,53 +190,57 @@ export class MapService {
   }
 
   static setMaxValue(value){
-    // ToDo, coronaService übermittelt schon value, Beschriftung der Scala anpassen
-    console.log(value);
+    maxValue = value;
+    this.createLables(value);
+    this.createAxesLabel(currentZ);
   }
-/*
-  // 
-  static setMaxValue(value){
-    const loader = new THREE.FontLoader();
 
-    loader.load( 'https://threejs.org/examples/fonts/droid/droid_serif_bold.typeface.json', function ( font ) {
-         var materials = [
-            new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, emissive: 0xffffff } ), // front
-            new THREE.MeshPhongMaterial( { color: 0xffffff, emissive: 0xffffff} ) // side
-        ];
-        var geo = new THREE.TextGeometry( '0', {
-            font: font,
-            size: 5,
-            height: 0,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 0,
-            bevelSize: 0,
-            bevelOffset: 0,
-            bevelSegments: 5
-        } );
-        var geo2 = new THREE.BufferGeometry().fromGeometry( geo );
-        var obj = new THREE.Mesh( geo2, materials );
-        obj.position.x = -250;
-        obj.position.y = -30;
-        scene.add(obj);
-        geo = new THREE.TextGeometry( '100', {
-            font: font,
-            size: 5,
-            height: 0,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 0,
-            bevelSize: 0,
-            bevelOffset: 0,
-            bevelSegments: 5
-        } );
-        geo2 = new THREE.BufferGeometry().fromGeometry( geo );
-        obj = new THREE.Mesh( geo2, materials );
-        obj.position.x = -250;
-        obj.position.y = -30;
-        obj.position.z = 100;
-        scene.add(obj);
-    } );
+  static createLables(value: number){
+    scala.remove(lables);
+    lables = new THREE.Group;
+    this.drawLables("0",9.5,49,0);
+    this.drawLables((value*0.25).toString(),9.5,47.2,100);
+    this.drawLables((value*0.5).toString(),9.5,47.2,200);
+    this.drawLables((value*0.75).toString(),9.5,47.2,300);
+    this.drawLables((value).toString(),9.5,47.2,400);
+    scala.add(lables);
   }
-  */
+
+  static drawLables(text: string,x ,y ,z ){
+    const loader = new THREE.FontLoader();
+    loader.load( 'https://threejs.org/examples/fonts/droid/droid_serif_bold.typeface.json', function ( font ) {
+      var geometry = new THREE.TextGeometry( text, {
+        font: font,
+        size: 8,
+        height: 0,
+        curveSegments: 12,
+        bevelEnabled: false,
+      } );
+      var buff_geometry = new THREE.BufferGeometry().fromGeometry( geometry );
+      var obj_text = new THREE.Mesh( buff_geometry, m_lables );
+      lables.add(obj_text);
+      obj_text.position.x = x*factor-deltaX;
+      obj_text.position.y = y*factor-deltaY;
+      obj_text.position.z = z;
+    });
+  }
+
+  static createAxesLabel(value: number){
+    axes_scala.remove(axes_lable)
+    const loader = new THREE.FontLoader();
+    loader.load( 'https://threejs.org/examples/fonts/droid/droid_serif_bold.typeface.json', function ( font ) {
+      var geometry = new THREE.TextGeometry( (maxValue*(value/500)).toString(), {
+        font: font,
+        size: 8,
+        height: 0,
+        curveSegments: 12,
+        bevelEnabled: false,
+      } );
+      var buff_geometry = new THREE.BufferGeometry().fromGeometry( geometry );
+      axes_lable = new THREE.Mesh( buff_geometry, m_lables );
+      axes_scala.add(axes_lable);
+      axes_lable.position.x = 17.1*factor-deltaX;
+      axes_lable.position.y = 46.35*factor-deltaY;
+    });
+  }
 }

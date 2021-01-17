@@ -6,5 +6,9 @@
     "/corona": {
         "target": "http://localhost:8000",
         "secure": false
+    },
+    "/impfung": {
+        "target": "http://localhost:8000",
+        "secure": false
     }
   }

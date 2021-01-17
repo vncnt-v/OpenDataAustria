@@ -1,0 +1,39 @@
+#Title{
+    color: #f0f0f0;
+    width: 100%;
+    text-align: center;
+    font-size: 50px;
+    font-weight: 100;
+    padding-left: 3em;
+}
+.center {
+    padding-top: 29em;
+    display: inline-block;
+    justify-content: center;
+    align-items: center;
+}
+button{
+    border: 1px solid #00000000;
+    display: block;
+    width: 14em;
+}
+button:hover{
+    border: 1px solid #ffffff;
+}
+.corona{
+    background-color: #b00020;
+}
+.impfung{
+    background-color: #007acc;
+}
+.item{
+    margin: 10px;
+    display: block;
+    cursor: pointer;
+}
+.left{
+    float:left;
+    padding-top: 30em;
+    height: 100%;
+    width: 50%;
+}

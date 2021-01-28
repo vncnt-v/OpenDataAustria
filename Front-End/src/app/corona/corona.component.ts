@@ -31,6 +31,9 @@ export class CoronaComponent implements OnInit {
     this.renderer.start(this);
   }
 
+  /*favoriteSeason: string;
+  seasons: string[] = ['Bundesländer', 'Bezirke'];*/
+
   data: Data[] = [
     {value: '5', viewValue: 'Infektionen 7 Tage'},
     {value: '3', viewValue: 'Infektionen gesamt'},
@@ -40,7 +43,7 @@ export class CoronaComponent implements OnInit {
   selectedData = this.data[0].value;
 
   getData(){
-    return this.http.get('/corona', {responseType: 'text'});
+    return this.http.get('/corona-data', {responseType: 'text'});
   }
 
   getObjects(){
@@ -130,7 +133,7 @@ export class CoronaComponent implements OnInit {
 
   static visualizeEntry(lat,long,height,name,value){
       var geometry = new THREE.BoxGeometry( 2, 2, height);
-      let m_coronaData = new THREE.MeshLambertMaterial( {color: 0x2194ce, transparent: true, opacity: 0.5, emissive: 0x7a2c2c} );
+      let m_coronaData = new THREE.MeshLambertMaterial( {color: 0xc91a1a, transparent: true, opacity: 0.7, emissive: 0xc91a1a} );
       var cube = new THREE.Mesh( geometry, m_coronaData );
       cube.position.z = height/2;
       cube.position.y = lat * factor - deltaY;

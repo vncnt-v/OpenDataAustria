@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import * as THREE from 'three';
 
 var scene;
-var m_bundesland = new THREE.LineBasicMaterial( {color: 0xDE1232,});
+var m_bundesland = new THREE.LineBasicMaterial( {color: 0xd90000 });
 var m_bundeslandAxes = new THREE.LineBasicMaterial( {color: 0x777777 });
 var m_bundeslandAxesFilled = new THREE.MeshLambertMaterial( {color: 0x000000 });
 var m_scala = new THREE.LineDashedMaterial( {color: 0x777777, scale: 1.1, dashSize: 4.5, gapSize: 4.5,});
@@ -33,7 +33,7 @@ export class MapService {
   }
 
   getData(){
-    return this.http.get('/map', {responseType: 'text'});
+    return this.http.get('/map-data', {responseType: 'text'});
   }
 
   setUp(sceneTmp) {

@@ -1,13 +1,13 @@
 {
-    "/map": {
+    "/map-data": {
         "target": "http://localhost:8000",
         "secure": false
     },
-    "/corona": {
+    "/corona-data": {
         "target": "http://localhost:8000",
         "secure": false
     },
-    "/impfung": {
+    "/impfung-data": {
         "target": "http://localhost:8000",
         "secure": false
     }

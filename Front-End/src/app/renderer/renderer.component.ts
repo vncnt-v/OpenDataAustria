@@ -32,7 +32,9 @@ export class RendererComponent {
     var renderer =  new THREE.WebGLRenderer({antialias: true});
     // Background
     renderer.setClearColor("#050505");
-    renderer.setSize(window.innerWidth,window.innerHeight);
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize(innerWidth, innerHeight);
+    //renderer.setSize(innerWidth,innerHeight);
     document.body.appendChild(renderer.domElement);
     // Add Orbit Controls
     var controls = new OrbitControls( camera, renderer.domElement );
@@ -68,8 +70,7 @@ export class RendererComponent {
           if (document.getElementById('info-text') != null){
             document.getElementById('info-box').style.display = "none";
           }
-				}
-        //
+        }
         requestAnimationFrame(render);
         renderer.render(scene,camera);
     }

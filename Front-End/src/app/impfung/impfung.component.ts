@@ -39,7 +39,7 @@ export class ImpfungComponent implements OnInit {
   selectedData = this.data[0].value;
 
   getData(){
-    return this.http.get('/impfung', {responseType: 'text'});
+    return this.http.get('/impfung-data', {responseType: 'text'});
   }
 
   getObjects(){
@@ -132,7 +132,7 @@ export class ImpfungComponent implements OnInit {
 
   static visualizeEntry(lat,long,height,name,value){
       var geometry = new THREE.BoxGeometry( 2, 2, height);
-      let m_coronaData = new THREE.MeshLambertMaterial( {color: 0x2194ce, transparent: true, opacity: 0.5, emissive: 0x2194ce} );
+      let m_coronaData = new THREE.MeshLambertMaterial( {color: 0x2194ce, transparent: true, opacity: 0.7, emissive: 0x2194ce} );
       var cube = new THREE.Mesh( geometry, m_coronaData );
       cube.position.z = height/2;
       cube.position.y = lat * factor - deltaY;

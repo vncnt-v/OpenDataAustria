@@ -1,39 +1,83 @@
-#Title{
+.home-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.sidenav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 25em;
+    border-right: 1px solid #dddddd33;
+    background: #222222;
+    padding: 5em 2em 0 2em;
+}
+.mat-card-avatar{
+    border-radius: 0;
+}
+.title{
     color: #f0f0f0;
-    width: 100%;
-    text-align: center;
     font-size: 50px;
     font-weight: 100;
-    padding-left: 3em;
+    line-height: 1.1;
 }
-.center {
-    padding-top: 29em;
-    display: inline-block;
-    justify-content: center;
-    align-items: center;
+.content{
+    padding: 15em 5em 5em 5em;
+    background: #222222;
 }
-button{
+
+.card {
+    margin: 10px;
+    width: 20em;
+    cursor: pointer;
     border: 1px solid #00000000;
-    display: block;
-    width: 14em;
 }
-button:hover{
+.card:hover{
     border: 1px solid #ffffff;
 }
-.corona{
+.red {
     background-color: #b00020;
 }
-.impfung{
+.blue {
     background-color: #007acc;
 }
-.item{
-    margin: 10px;
-    display: block;
-    cursor: pointer;
+.green {
+    background-color: #25b333;
 }
-.left{
-    float:left;
-    padding-top: 30em;
-    height: 100%;
-    width: 50%;
+  
+.virus-image {
+    background-image: url("src/assets/img/virus-icon.png");
+    background-size: cover;
 }
+.impfung-image {
+    background-image: url("src/assets/img/impfung-icon.png");
+    background-size: cover;
+}
+ul{
+    margin-left: 1.5em;
+}
+.mobile-title{
+    display: none;
+}
+@media only screen and (max-width: 900px) {
+    .sidenav {
+      display: none;
+    }
+    .content{
+        padding: 3em 2em 5em 2em;
+    }
+    .card{
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .mobile-title{
+        width: 23em;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 2em;
+        display: block;
+    }
+  }

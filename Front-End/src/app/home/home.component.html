@@ -1,13 +1,38 @@
-<div class="left">
-    <h1 id="Title">Open Data Österreich</h1>
-</div>
-<div class="center">
-    <div [routerLink]="['/corona']" class="item">
-        <!--<img src="assets/img/corona.png" class="item-img">-->
-        <button mat-raised-button class="corona">Corona Fälle</button>
-    </div>
-    <div [routerLink]="['/impfung']" class="item">
-        <!--<img src="assets/img/impfung.png" class="item-img">-->
-        <button mat-raised-button class="impfung">Corona Impfung</button>
-    </div>
-</div>
+<mat-sidenav-container class="home-container">
+    <mat-sidenav #sidenav mode="side" opened class="sidenav">
+        <h1 class="title">Open<br>Data<br>Österreich 3D</h1>
+    </mat-sidenav>
+    <mat-sidenav-content class="content">
+        <div class="mobile-title"><h1 class="title">Open<br>Data<br>Österreich 3D</h1></div>
+        <mat-card [routerLink]="['/corona']" class="card red">
+            <mat-card-header>
+              <div mat-card-avatar class="virus-image"></div>
+              <mat-card-title>Corona Fälle</mat-card-title>
+              <mat-card-subtitle>Täglich aktuelle Daten</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+            <ul>
+                <li>Fälle 7 Tage</li>
+                <li>Gesamt Fälle</li>
+                <li>Gesamt Todeszahlen</li>
+                <li>Skalierbar auf 100.000</li>
+            </ul>  
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card [routerLink]="['/impfung']" class="card blue">
+            <mat-card-header>
+              <div mat-card-avatar class="impfung-image"></div>
+              <mat-card-title>Corona Impfungen</mat-card-title>
+              <mat-card-subtitle>Täglich aktuelle Daten</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+                <ul>
+                    <li>Auslieferungen</li>
+                    <li>Bestellungen</li>
+                    <li>Skalierbar auf 100</li>
+                </ul>  
+            </mat-card-content>
+        </mat-card>
+    </mat-sidenav-content>
+  </mat-sidenav-container>

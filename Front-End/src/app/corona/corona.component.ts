@@ -10,6 +10,7 @@ var deltaY = 2600;
 var factor = 55;
 var scene;
 var storage;
+var bundeslaender_count = [0,0,0,0,0,0,0,0,0];
 
 interface Data {
   value: string;
@@ -30,9 +31,6 @@ export class CoronaComponent implements OnInit {
   ngOnInit(): void {
     this.renderer.start(this);
   }
-
-  /*favoriteSeason: string;
-  seasons: string[] = ['Bundesländer', 'Bezirke'];*/
 
   data: Data[] = [
     {value: '5', viewValue: 'Infektionen 7 Tage'},
@@ -62,7 +60,8 @@ export class CoronaComponent implements OnInit {
   }
 
   static visualizeData(dataID) {
-    scene.remove(assets);
+    //scene.remove(assets);
+    RendererComponent.bezirkDataGroup.clear();
     assets = new THREE.Group();
 
       // CovidFaelle_GKZ.csv bezirke durch Newlines getrennt
@@ -78,9 +77,36 @@ export class CoronaComponent implements OnInit {
         value = this.calculateValue(dataID,bezirk);
         // Scale to max
         var value_scaled = (value/100*(400/(nextBiggerScale/100)));
-        this.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[0],value);
+        var id = bezirk[1].charAt(0);
+        if (id == 0){
+          id = 4;
+          // Burgenland
+        } else if (id == 1){
+          id = 3;
+        } else if (id == 2){
+          id = 6;
+        } else if (id == 3){
+          id = 4;
+        } else if (id == 4){
+          id = 0;
+        } else if (id == 5){
+          id = 8;
+        } else if (id == 6){
+          id = 2;
+        } else if (id == 7){
+          id = 1;
+        } else if (id == 8){
+          id = 7;
+        } else if (id == 9){
+          id = 4;
+        }
+        bundeslaender_count[bezirk[1].charAt(0)] += value;
+        this.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[0],value,id);
       }
-      scene.add(assets);
+      for (var i = 0; i < bundeslaender_count.length && bundeslaender_count[i] != 0; i++){
+        this.visualizeEntry(47.84,18.52,bundeslaender_count[i],"Bundesland",value,-1);
+      }
+      //scene.add(assets);
       MapService.setMaxValue(nextBiggerScale);
   }
 
@@ -131,17 +157,19 @@ export class CoronaComponent implements OnInit {
     return maxValue;
   }
 
-  static visualizeEntry(lat,long,height,name,value){
+  static visualizeEntry(lat,long,height,name,value,id){
       var geometry = new THREE.BoxGeometry( 2, 2, height);
       let m_coronaData = new THREE.MeshLambertMaterial( {color: 0xc91a1a, transparent: true, opacity: 0.7, emissive: 0xc91a1a} );
       var cube = new THREE.Mesh( geometry, m_coronaData );
       cube.position.z = height/2;
       cube.position.y = lat * factor - deltaY;
       cube.position.x = long * factor - deltaX;
-      cube.layers.set(2);
+      cube.layers.set(3);
+      cube.userData.id = id;
       cube.userData.name = name;
       cube.userData.value = Math.floor(value);
-      assets.add(cube);
+      RendererComponent.addBezirk(cube);
+      //RendererComponent.bezirkDataGroup.add(cube);
   }
 
   checkedAxes = false;
@@ -151,7 +179,9 @@ export class CoronaComponent implements OnInit {
   checkedScala = true;
   disabledAxesOptions = true;
 
+  static showBundeslandData(id){
 
+  }
   
   // Wählt Datentyp aus und schaut ob Scale gesetzt ist, bzw schaltet Scale disable.
   selectData(event) {

@@ -19,3 +19,18 @@
     text-align: center;
     margin: 0;
 }
+#show-all-button {
+    background-color: #222222;
+    position: absolute;
+    left: 1em;
+    bottom: 1em;
+}
+.white-icon svg {
+    fill: white;
+}
+.white-icon {
+    color: #d0d0d0;
+}
+.hide {
+    display: none;
+}

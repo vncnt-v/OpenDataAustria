@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import * as THREE from 'three';
+import { RendererComponent } from '../renderer/renderer.component';
+import { Identifiers } from '@angular/compiler';
 
 var scene;
-var m_bundesland = new THREE.LineBasicMaterial( {color: 0xd90000 });
+var m_bundesland = new THREE.LineBasicMaterial( {color: 0x323232 });
 var m_bundeslandAxes = new THREE.LineBasicMaterial( {color: 0x777777 });
-var m_bundeslandAxesFilled = new THREE.MeshLambertMaterial( {color: 0x000000 });
+var m_bundeslandAxesFilled = new THREE.MeshLambertMaterial( {color: 0x323232 });
 var m_scala = new THREE.LineDashedMaterial( {color: 0x777777, scale: 1.1, dashSize: 4.5, gapSize: 4.5,});
 var m_lables = [
   new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, emissive: 0xffffff } ), // front
@@ -36,8 +38,8 @@ export class MapService {
     return this.http.get('/map-data', {responseType: 'text'});
   }
 
-  setUp(sceneTmp) {
-    scene = sceneTmp;
+  setUp() {
+    scene = RendererComponent.scene;
     this.getData().subscribe(data =>
       this.visualizeData(data)
     );
@@ -50,6 +52,9 @@ export class MapService {
     // Ausnahe bei Tirol
     for (var i = 0; i < obj['features'].length; i++){
         for (var j = 0; j < obj['features'][i]['geometry']['coordinates'].length; j++){
+          if (i == 4 && j != 0){
+            continue;
+          }
             var vectors = [];
             if (i != 1){
                 for (var k = 0; k < obj['features'][i]['geometry']['coordinates'][j].length; k++){
@@ -60,11 +65,14 @@ export class MapService {
                     vectors.push(new THREE.Vector2( obj['features'][i]['geometry']['coordinates'][j][0][k][0]*factor-deltaX, obj['features'][i]['geometry']['coordinates'][j][0][k][1]*factor-deltaY));
                 }
             }
-            // Draw red line Bundesland
-            this.drawBundesland(vectors);
+            // Draw Bundesland
+            if (i == 5){
+              this.drawBundesland(4,vectors,false);
+            } else {
+              this.drawBundesland(i,vectors,true);
+            }
             // Draw white line Bundesland (kann bei z.B.: 1.000 als "Achse" stehen, teils als Fläche um nur die zu sehen welche die 1.000 Grenze überschreiten oder nur als Linie)
             this.drawBundeslandAxes(vectors);
-            // ** TEST ** Draw Kärnten Fläche **
             this.drawBundeslandAxesFilled(vectors);
         }
     }
@@ -84,10 +92,39 @@ export class MapService {
   }
 
   // Grundriss
-  drawBundesland(vectors){
+  drawBundesland(id,vectors,fill){
     var geometry = new THREE.BufferGeometry().setFromPoints(vectors);
     var line = new THREE.Line( geometry, m_bundesland );
-    map.add( line );
+    if (fill){
+      const extrudeSettings = {
+        steps: 2,
+        depth: 16,
+        bevelEnabled: true,
+        bevelThickness: 0,
+        bevelSize: 0,
+        bevelOffset: 0,
+        bevelSegments: 1
+      };
+      const shape = new THREE.Shape( vectors );
+      const geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+      const material = new THREE.MeshBasicMaterial( { color: 0xad0000 } );
+      const mesh = new THREE.Mesh( geometry, material ) ;
+      mesh.userData.name = "id";
+      mesh.userData.value = id;
+      mesh.layers.set(2);
+      mesh.position.z = -16.5;
+      const tempGroup = new THREE.Group;
+      tempGroup.add(line);
+      tempGroup.add(mesh);
+      
+      tempGroup.userData.name = "id";
+      tempGroup.userData.value = id;
+      RendererComponent.bundeslaenderGroup.add(tempGroup);
+    } else {
+      line.userData.name = "id";
+      line.userData.value = id;
+      RendererComponent.bundeslaenderGroup.add(line);
+    }
   }
   // Querschnitt & Achse des Querschnitts -> Default not visible
   drawBundeslandAxes(vectors){
@@ -171,7 +208,7 @@ export class MapService {
   // Setzt den Querschnitt auf z Koordinate
   static setAxes(value){
     axes_scala.remove(axes_lable);
-    //this.createAxesLabel(value);
+    this.createAxesLabel(value);
     axes.position.z = (value/100*(400/(500/100)));
     axes_scala.position.z = (value/100*(400/(500/100)));
     currentZ = value;

@@ -72,6 +72,7 @@ export class CoronaComponent implements OnInit {
       var nextBiggerScale = 0;
       maxValue = this.calculateMax(dataID,bezirke);
       nextBiggerScale = this.calculateNextBiggerScale(maxValue);
+      
       for (var i = 0; i < bezirke.length-1; i++){
         var bezirk = bezirke[i+1].split(';');
         value = this.calculateValue(dataID,bezirk);
@@ -98,13 +99,15 @@ export class CoronaComponent implements OnInit {
         } else if (id == 8){
           id = 7;
         } else if (id == 9){
-          id = 4;
+          id = 5;
         }
-        bundeslaender_count[bezirk[1].charAt(0)] += value;
-        this.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[0],value,id);
+        bundeslaender_count[id] += value;
+        this.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[0],value,id,false);
       }
-      for (var i = 0; i < bundeslaender_count.length && bundeslaender_count[i] != 0; i++){
-        this.visualizeEntry(47.84,18.52,bundeslaender_count[i],"Bundesland",value,-1);
+      var b_coordinates = [[48.305908,14.286198],[47.26543,11.392769],[47.070868,15.438279],[47.838758,16.536216],[48.193315,15.619872],[48.208354,16.372504],[46.622816,14.30796],[47.502578,9.747292],[47.798135,13.046481]];
+      var b_names = ["Oberösterreich","Tirol","Steiermark","Burgenland","Niederösterreich","Wien","Kärten","Vorarlberg","Salzburg"];
+      for (var i = 0; i < bundeslaender_count.length; i++){
+        this.visualizeEntry(b_coordinates[i][0],b_coordinates[i][1],bundeslaender_count[i],b_names[i],bundeslaender_count[i],i,true);
       }
       //scene.add(assets);
       MapService.setMaxValue(nextBiggerScale);
@@ -157,19 +160,26 @@ export class CoronaComponent implements OnInit {
     return maxValue;
   }
 
-  static visualizeEntry(lat,long,height,name,value,id){
-      var geometry = new THREE.BoxGeometry( 2, 2, height);
-      let m_coronaData = new THREE.MeshLambertMaterial( {color: 0xc91a1a, transparent: true, opacity: 0.7, emissive: 0xc91a1a} );
-      var cube = new THREE.Mesh( geometry, m_coronaData );
-      cube.position.z = height/2;
-      cube.position.y = lat * factor - deltaY;
-      cube.position.x = long * factor - deltaX;
-      cube.layers.set(3);
-      cube.userData.id = id;
-      cube.userData.name = name;
-      cube.userData.value = Math.floor(value);
+  static visualizeEntry(lat,long,height,name,value,id,bundesland){
+    var geometry = new THREE.BoxGeometry( 2, 2, height);
+    if (bundesland){
+      geometry = new THREE.BoxGeometry( 3, 3, height);
+    }
+    let m_coronaData = new THREE.MeshLambertMaterial( {color: 0xc91a1a, transparent: true, opacity: 0.7, emissive: 0xc91a1a} );
+    var cube = new THREE.Mesh( geometry, m_coronaData );
+    cube.position.z = height/2;
+    cube.position.y = lat * factor - deltaY;
+    cube.position.x = long * factor - deltaX;
+    cube.layers.set(3);
+    cube.userData.id = id;
+    cube.userData.name = name;
+    cube.userData.value = Math.floor(value);
+    if (bundesland){
+      RendererComponent.addBundesland(cube);
+    } else {
       RendererComponent.addBezirk(cube);
-      //RendererComponent.bezirkDataGroup.add(cube);
+    }
+    //RendererComponent.bezirkDataGroup.add(cube);
   }
 
   checkedAxes = false;

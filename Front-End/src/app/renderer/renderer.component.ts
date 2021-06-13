@@ -18,13 +18,18 @@ export class RendererComponent {
   static bundeslaenderGroup = new THREE.Group;
   // Bezirke Group
   static bezirkDataGroup = new THREE.Group;
+  static bundeslandDataGroup = new THREE.Group;
 
   static selected = false;
   static selectedBundesland = 0;
 
+  static mouseMoved = false;
+
   start(request) {
     // Create new THREE JS Scene
     RendererComponent.scene = new THREE.Scene();
+
+    RendererComponent.bezirkDataGroup.visible = false;
 
     // Raycast Bundesländer 
     const raycaster = new THREE.Raycaster();
@@ -68,40 +73,55 @@ export class RendererComponent {
     var render = function(){
       controls.update();
       
-      // Raycast Bundesländer
-      raycaster.setFromCamera( mouse, camera );
-      const intersects = raycaster.intersectObjects( RendererComponent.scene.children, true );
-      if (intersects.length > 0 && intersects[0]) {
-        if ( INTERSECTED != intersects[ 0 ].object && intersects[ 0 ].object.visible == true) {
-          if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-          INTERSECTED = intersects[ 0 ].object;
-          INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-          INTERSECTED.material.color.setHex( 0x800000 );
-        }
-      } else {
-        if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-        INTERSECTED = null;
-      }
-      
+      var bezirkHit = false;      
       // Raycast Bezirke
       raycasterData.setFromCamera( mouse, camera );
       const intersectsData = raycasterData.intersectObjects( RendererComponent.scene.children, true );
-      if (intersectsData.length > 0 && intersectsData[0]) {
-        if ( INTERSECTEDDATA != intersectsData[ 0 ].object && intersectsData[ 0 ].object.visible == true) {
-          if ( INTERSECTEDDATA ) INTERSECTEDDATA.material.color.setHex( INTERSECTEDDATA.currentHex );
-          if (document.getElementById('info-text') != null){
-            document.getElementById('info-text').innerHTML = String(intersectsData[0].object.userData.name+"<br>"+intersectsData[0].object.userData.value);
-            document.getElementById('info-box').style.display = "block";
-            document.getElementById('info-box').style.top = String(mouse_r.y)+"px";
-            document.getElementById('info-box').style.left = String(mouse_r.x+10)+"px";
+      for (var i = 0; i < intersectsData.length && i < 10; i++){
+        if (intersectsData[i] && intersectsData[i].object.visible == true) {
+          bezirkHit = true;
+          if (INTERSECTEDDATA != intersectsData[i].object){
+            if ( INTERSECTEDDATA ) INTERSECTEDDATA.material.emissive.setHex( INTERSECTEDDATA.currentHex );
+            if (document.getElementById('info-text') != null){
+              
+              INTERSECTEDDATA = intersectsData[i].object;
+              document.getElementById('info-text').innerHTML = String(intersectsData[i].object.userData.name+"<br>"+intersectsData[i].object.userData.value);
+              document.getElementById('info-box').style.display = "block";
+              document.getElementById('info-box').style.top = String(mouse_r.y)+"px";
+              document.getElementById('info-box').style.left = String(mouse_r.x+10)+"px";
+              INTERSECTEDDATA.currentHex = INTERSECTEDDATA.material.emissive.getHex();
+              INTERSECTEDDATA.material.emissive.setHex( 0xff0000 );
+            }
           }
+          break;
         }
-      } else {
-        if ( INTERSECTEDDATA ) INTERSECTEDDATA.material.color.setHex( INTERSECTEDDATA.currentHex );
+      }
+      if (!bezirkHit){
+        if ( INTERSECTEDDATA ) INTERSECTEDDATA.material.emissive.setHex( INTERSECTEDDATA.currentHex );
         INTERSECTEDDATA = null;
         if (document.getElementById('info-text') != null){
           document.getElementById('info-box').style.display = "none";
         }
+      }
+
+      // Raycast Bundesländer
+      if (!bezirkHit) {
+        raycaster.setFromCamera( mouse, camera );
+        const intersects = raycaster.intersectObjects( RendererComponent.scene.children, true );
+        if (intersects.length > 0 && intersects[0]) {
+          if ( INTERSECTED != intersects[ 0 ].object && intersects[ 0 ].object.visible == true) {
+            if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+            INTERSECTED = intersects[ 0 ].object;
+            INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+            INTERSECTED.material.color.setHex( 0x800000 );
+          }
+        } else {
+          if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+          INTERSECTED = null;
+        }
+      } else {
+        if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+        INTERSECTED = null;
       }
       
       // THREE JS Components
@@ -112,6 +132,7 @@ export class RendererComponent {
     // Add Click Event
     var canvas_model = document.getElementsByTagName('canvas');
     if (canvas_model.length > 0){
+      
       canvas_model[0].addEventListener('click', function(event){
         // Get Mouse Position
         var bounds = canvas_model[0].getBoundingClientRect();
@@ -124,9 +145,14 @@ export class RendererComponent {
         if (intersects.length > 0) {
           // Check if show Bundesland or show all
           if(!RendererComponent.selected){
+            RendererComponent.bundeslandDataGroup.visible = false;
+            RendererComponent.bezirkDataGroup.visible = true;
+            RendererComponent.bundeslandDataGroup.children.forEach(item => {
+              item.visible = false;
+            });
             // Check if Bezirk Obj id == raycasted value
             RendererComponent.bezirkDataGroup.children.forEach(item => {
-              if(intersects[0].object.userData.value == item.userData.id){
+              if(intersects[0].object.userData.value == item.userData.id || (intersects[0].object.userData.value == 4 && item.userData.id == 5)){
                 item.visible = true;
               } else {
                 item.visible = false;
@@ -155,10 +181,15 @@ export class RendererComponent {
             });
             // Show all Bundeslander and Bezirke
             if (tmpBool){
+              RendererComponent.bezirkDataGroup.visible = false;
+              RendererComponent.bundeslandDataGroup.visible = true;
               RendererComponent.bundeslaenderGroup.children.forEach(item => {
                 item.visible = true;
               });
               RendererComponent.bezirkDataGroup.children.forEach(item => {
+                item.visible = false;
+              });
+              RendererComponent.bundeslandDataGroup.children.forEach(item => {
                 item.visible = true;
               });
               RendererComponent.selected = false;
@@ -180,7 +211,7 @@ export class RendererComponent {
       RendererComponent.selected = false;
       document.getElementById('show-all-button').classList.add("hide");
     }, false);
-  
+
     // THREE JS Resize function
     window.addEventListener('resize',() => {
         renderer.setSize(window.innerWidth,window.innerHeight);
@@ -190,6 +221,7 @@ export class RendererComponent {
     
     // Add mousemove event
     window.addEventListener( 'mousemove',(event) => {
+      RendererComponent.mouseMoved = true;
       event.preventDefault();
       mouse_r.x = event.clientX;
       mouse_r.y = event.clientY;
@@ -201,6 +233,7 @@ export class RendererComponent {
     render();
     this.map.setUp();
     RendererComponent.scene.add(RendererComponent.bundeslaenderGroup);
+    RendererComponent.scene.add(RendererComponent.bundeslandDataGroup);
     RendererComponent.scene.add(RendererComponent.bezirkDataGroup);
     request.setUp(RendererComponent.scene);
   }
@@ -212,7 +245,15 @@ export class RendererComponent {
       } else {
         entry.visible = true;
       }
+    } else {
+      entry.visible = false;
     }
     RendererComponent.bezirkDataGroup.add(entry);
+  }
+  static addBundesland(entry: THREE.Mesh){
+    if (RendererComponent.selected) {
+      entry.visible = false;
+    }
+    RendererComponent.bundeslandDataGroup.add(entry);
   }
 }

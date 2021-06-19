@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { MapService } from '../services/map.service';
 import * as THREE from 'three';
+import { CoronaComponent } from '../corona/corona.component';
 
 @Component({
   selector: 'app-renderer',
@@ -23,8 +24,6 @@ export class RendererComponent {
   static selected = false;
   static selectedBundesland = 0;
 
-  static mouseMoved = false;
-
   start(request) {
     // Create new THREE JS Scene
     RendererComponent.scene = new THREE.Scene();
@@ -42,6 +41,7 @@ export class RendererComponent {
 
     // Get Mouse Position
     const mouse = new THREE.Vector2();
+    const mouse_drag_pos = new THREE.Vector2();
     const mouse_r = new THREE.Vector2();
     mouse.x = 0;
     mouse.y = 0;
@@ -133,18 +133,26 @@ export class RendererComponent {
     var canvas_model = document.getElementsByTagName('canvas');
     if (canvas_model.length > 0){
       
+      canvas_model[0].addEventListener('pointerdown', function(event){
+        var bounds = canvas_model[0].getBoundingClientRect();
+        mouse_drag_pos.x = ((event.clientX - bounds.left) / canvas_model[0].clientWidth ) * 2 - 1;
+        mouse_drag_pos.y = - ((event.clientY - bounds.top) / canvas_model[0].clientHeight ) * 2 + 1;
+      }, false)
       canvas_model[0].addEventListener('click', function(event){
         // Get Mouse Position
         var bounds = canvas_model[0].getBoundingClientRect();
         mouse.x = ( (event.clientX - bounds.left) / canvas_model[0].clientWidth ) * 2 - 1;
         mouse.y = - ( (event.clientY - bounds.top) / canvas_model[0].clientHeight ) * 2 + 1;
-
+        if (mouse.x != mouse_drag_pos.x && mouse.y != mouse_drag_pos.y) {
+          return;
+        }
         // Raycast Bundesland
         raycaster.setFromCamera( mouse, camera );
         var intersects = raycaster.intersectObjects(RendererComponent.scene.children, true);
         if (intersects.length > 0) {
           // Check if show Bundesland or show all
           if(!RendererComponent.selected){
+
             RendererComponent.bundeslandDataGroup.visible = false;
             RendererComponent.bezirkDataGroup.visible = true;
             RendererComponent.bundeslandDataGroup.children.forEach(item => {
@@ -152,7 +160,7 @@ export class RendererComponent {
             });
             // Check if Bezirk Obj id == raycasted value
             RendererComponent.bezirkDataGroup.children.forEach(item => {
-              if(intersects[0].object.userData.value == item.userData.id || (intersects[0].object.userData.value == 4 && item.userData.id == 5)){
+              if(intersects[0].object.userData.value == item.userData.id){
                 item.visible = true;
               } else {
                 item.visible = false;
@@ -168,6 +176,8 @@ export class RendererComponent {
             });
             RendererComponent.selectedBundesland = intersects[0].object.userData.value;
             RendererComponent.selected = true;
+            CoronaComponent.changeTable(intersects[0].object.userData.value);
+            MapService.setBundeslandScala(intersects[0].object.userData.value);
             document.getElementById('show-all-button').classList.remove("hide");
           } else {
             var tmpBool = false;
@@ -179,8 +189,10 @@ export class RendererComponent {
                 }
               }
             });
-            // Show all Bundeslander and Bezirke
+            // Show all Bundeslaender
             if (tmpBool){
+              CoronaComponent.changeTable(-1);
+              MapService.setMaxValueAll();
               RendererComponent.bezirkDataGroup.visible = false;
               RendererComponent.bundeslandDataGroup.visible = true;
               RendererComponent.bundeslaenderGroup.children.forEach(item => {
@@ -202,10 +214,17 @@ export class RendererComponent {
 
     // Add click event show all btn
     document.getElementById('show-all-button').addEventListener('click', function(event){
+      CoronaComponent.changeTable(-1);
+      MapService.setMaxValueAll();
+      RendererComponent.bezirkDataGroup.visible = false;
+      RendererComponent.bundeslandDataGroup.visible = true;
       RendererComponent.bundeslaenderGroup.children.forEach(item => {
         item.visible = true;
       });
       RendererComponent.bezirkDataGroup.children.forEach(item => {
+        item.visible = false;
+      });
+      RendererComponent.bundeslandDataGroup.children.forEach(item => {
         item.visible = true;
       });
       RendererComponent.selected = false;
@@ -221,7 +240,6 @@ export class RendererComponent {
     
     // Add mousemove event
     window.addEventListener( 'mousemove',(event) => {
-      RendererComponent.mouseMoved = true;
       event.preventDefault();
       mouse_r.x = event.clientX;
       mouse_r.y = event.clientY;

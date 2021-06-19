@@ -24,6 +24,7 @@ var axes_scala = new THREE.Line();
 var lables = new THREE.Group();
 var axes_lable;
 var maxValue;
+var bundeslandMaxValue = [];
 var currentZ = 125;
 
 @Injectable({
@@ -226,9 +227,18 @@ export class MapService {
     axes_filled.visible = value;
   }
 
-  static setMaxValue(value){
+  static setMaxValue(value,bundeslandValue){
     maxValue = value;
+    bundeslandMaxValue = bundeslandValue;
     this.createLables(value);
+    this.createAxesLabel(currentZ);
+  }
+  static setMaxValueAll(){
+    this.createLables(maxValue);
+    this.createAxesLabel(currentZ);
+  }
+  static setBundeslandScala(id: number) {
+    this.createLables(bundeslandMaxValue[id]);
     this.createAxesLabel(currentZ);
   }
 

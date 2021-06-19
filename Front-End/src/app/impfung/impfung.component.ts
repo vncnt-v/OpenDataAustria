@@ -28,9 +28,9 @@ export class ImpfungComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    //this.renderer.start(this);
+    this.renderer.start(this);
   }
-/*
+
   data: Data[] = [
     {value: '1', viewValue: 'Auslieferungen'},
     {value: '3', viewValue: 'Bestellungen'},
@@ -190,7 +190,7 @@ export class ImpfungComponent implements OnInit {
       }
     }
   }
-/*
+
   toogleAxes(event) {
     if (event.checked){
       this.disabledAxesOptions = false;
@@ -220,5 +220,5 @@ export class ImpfungComponent implements OnInit {
 
   sliderChanged(event){
     MapService.createAxesLabel(event.value);
-  }*/
+  }
 }

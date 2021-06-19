@@ -19,19 +19,52 @@
          <br>
         <br>
         <mat-slide-toggle [disabled]="disabled" (change)="scaleTo100000($event)">pro 100.000 Einwohner</mat-slide-toggle>
-        <br>
-        <br>
-        <mat-slide-toggle [checked]="checkedScala" (change)="toogleScala($event)">Skala einblenden</mat-slide-toggle>
-        <br>
-        <br>
-        <mat-slide-toggle [checked]="checkedAxes" (change)="toogleAxes($event)">Querschnitt einblenden</mat-slide-toggle>
-        <br>
-        <mat-slide-toggle [checked]="checkedFill" [disabled]="disabledAxesOptions" (change)="toggleFill($event)">Querschnitt füllen</mat-slide-toggle>
-        <br>
-        <br>
-        <p>Querschnitt:</p>
-        <mat-slider id="AxesSlider" min="0" max="500" [disabled]="disabledAxesOptions" [value]="100" (change)="sliderChanged($event)" (input)="sliderChange($event)"></mat-slider>
-  
+        <div style="height: 20px" *ngIf="!visual_map"></div>
+        <div *ngIf="visual_map">
+          <br>
+          <br>
+          <mat-slide-toggle [checked]="checkedScala" (change)="toogleScala($event)">Skala einblenden</mat-slide-toggle>
+          <br>
+          <br>
+          <mat-slide-toggle [checked]="checkedAxes" (change)="toogleAxes($event)">Querschnitt einblenden</mat-slide-toggle>
+          <br>
+          <mat-slide-toggle [checked]="checkedFill" [disabled]="disabledAxesOptions" (change)="toggleFill($event)">Querschnitt füllen</mat-slide-toggle>
+          <br>
+          <br>
+          <p>Querschnitt:</p>
+          <mat-slider id="AxesSlider" min="0" max="500" [disabled]="disabledAxesOptions" [value]="100" (change)="sliderChanged($event)" (input)="sliderChange($event)"></mat-slider>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <mat-accordion class="example-headers-align right" multi>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>menu</mat-icon>
+          </mat-panel-title>
+          <mat-panel-description>
+            Übersicht
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div class="full">
+          
+          <table mat-table [dataSource]="getStaticList()" (matSortChange)="sortData($event)" matSort matSortActive="count" matSortDisableClear matSortDirection="desc" class="mat-elevation-z8">
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Gebiet </th>
+              <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+            </ng-container>
+          
+            <!-- Weight Column -->
+            <ng-container matColumnDef="count">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear> Wert </th>
+              <td mat-cell *matCellDef="let element"> {{element.count}} </td>
+            </ng-container>
+          
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let element; columns: displayedColumns;"></tr>
+          </table>
+        </div>
       </mat-expansion-panel>
     </mat-accordion>
     <a href="/">
@@ -39,4 +72,10 @@
         <mat-icon class="white-icon">home</mat-icon>
       </button>
     </a>
-    
+  <div class="visual-style">
+    <div class="btn-container">
+      <button mat-flat-button class="visual-btn" id="visual-map" (click)="loadMap()" [disabled]="visual_map">Map</button>
+      <button mat-flat-button class="visual-btn" id="visual-particle" (click)="loadParticle()" [disabled]="visual_particle">Particle</button>
+    </div>
+  </div>
+  

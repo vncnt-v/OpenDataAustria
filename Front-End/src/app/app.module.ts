@@ -20,6 +20,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import { MatInputModule } from '@angular/material/input';
 import {MatCardModule} from '@angular/material/card';
+import {MatTableModule} from '@angular/material/table';
+import {MatSortModule} from '@angular/material/sort';
+import { RendererParticleComponent } from './renderer-particle/renderer-particle.component';
 
 
 @NgModule({
@@ -47,8 +50,10 @@ import {MatCardModule} from '@angular/material/card';
     ReactiveFormsModule,
     MatInputModule,
     MatCardModule,
+    MatTableModule,
+    MatSortModule,
   ],
-  providers: [RendererComponent],
+  providers: [RendererComponent, RendererParticleComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -8,6 +8,7 @@ import { TestBed } from '@angular/core/testing';
 import {Sort} from '@angular/material/sort';
 import { RendererParticleComponent } from '../renderer-particle/renderer-particle.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import { RendererPeriodicComponent } from '../renderer-periodic/renderer-periodic.component';
 
 let assets;
 var deltaX = 730;
@@ -42,7 +43,7 @@ var tableDataBezirkSelected = [];
 })
 export class CoronaComponent implements OnInit {
 
-  constructor(private router: Router, private http: HttpClient, private renderer: RendererComponent, private renderer_particle: RendererParticleComponent, private activatedRoute: ActivatedRoute) { 
+  constructor(private router: Router, private http: HttpClient, private renderer: RendererComponent, private renderer_particle: RendererParticleComponent, private renderer_periodic: RendererPeriodicComponent, private activatedRoute: ActivatedRoute) { 
     this.activatedRoute.queryParams.subscribe(params => {
       param = params['visual'];
     });
@@ -50,13 +51,25 @@ export class CoronaComponent implements OnInit {
 
   visual_map = false;
   visual_particle = false;
+  visual_periodic = false;
+
   ngOnInit(): void {
-    if (param != null && param == "particle"){
-      this.visual_particle = true;
-      this.renderer_particle.start(this);
-      this.getData().subscribe(data =>
-        this.saveData(data)
-      );
+    if (param != null){
+      if (param == "particle"){
+        this.visual_particle = true;
+        this.renderer_particle.start(this);
+        this.getData().subscribe(data =>
+          this.saveData(data)
+        );
+      } else if (param == "periodic") {
+        this.visual_periodic = true;
+        this.getData().subscribe(data =>
+          this.saveData(data)
+        );
+      } else {
+        this.visual_map = true;
+        this.renderer.start(this);
+      }
     } else {
       this.visual_map = true;
       this.renderer.start(this);
@@ -72,6 +85,12 @@ export class CoronaComponent implements OnInit {
   loadParticle() {
     this.router.navigateByUrl('/', {skipLocationChange: true}).then(() => {
       window.location.href = '/corona?visual=particle';
+    });
+  }
+
+  loadPeriodic() {
+    this.router.navigateByUrl('/', {skipLocationChange: true}).then(() => {
+      window.location.href = '/corona?visual=periodic';
     });
   }
 
@@ -109,6 +128,19 @@ export class CoronaComponent implements OnInit {
     storage = data;
     if (this.visual_particle){
       this.createParticle(5);
+    } else if (this.visual_periodic){
+      var bezirke = storage.split('\n');
+      tableDataBezirk = [];
+      for (var i = 0; i < bezirke.length-1; i++){
+        var bezirk = bezirke[i+1].split(';');
+        var value = CoronaComponent.calculateValue(5,bezirk);
+        tableDataBezirk.push({name: bezirk[0], count: Math.ceil(value)});
+      }
+      const sortPeriodicData = tableDataBezirk.slice();
+      CoronaComponent.sortedData = sortPeriodicData.sort((a, b) => {
+        return CoronaComponent.compare(a.count, b.count, false);
+      });
+      this.renderer_periodic.Init(sortPeriodicData);
     } else {
       this.visualizeData(5);
     }

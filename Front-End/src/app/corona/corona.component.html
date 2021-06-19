@@ -1,4 +1,7 @@
 <app-renderer></app-renderer>
+<div *ngIf="visual_periodic">
+  <app-renderer-periodic></app-renderer-periodic>
+</div>
 <mat-accordion class="example-headers-align" multi>
     <mat-expansion-panel>
         <mat-expansion-panel-header>
@@ -76,6 +79,7 @@
     <div class="btn-container">
       <button mat-flat-button class="visual-btn" id="visual-map" (click)="loadMap()" [disabled]="visual_map">Map</button>
       <button mat-flat-button class="visual-btn" id="visual-particle" (click)="loadParticle()" [disabled]="visual_particle">Particle</button>
+      <button mat-flat-button class="visual-btn" id="visual-periodic" (click)="loadPeriodic()" [disabled]="visual_periodic">Periodic</button>
     </div>
   </div>
   

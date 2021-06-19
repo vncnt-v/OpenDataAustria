@@ -6,6 +6,7 @@
   top: 7px;
   position: absolute;
   left: 50%;
+  z-index: 100;
 }
 .cdk-column-name {
   padding-right: 5px;
@@ -22,6 +23,9 @@
   border-bottom-right-radius: 0;
 }
 #visual-particle {
+  border-radius: 0;
+}
+#visual-periodic {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }

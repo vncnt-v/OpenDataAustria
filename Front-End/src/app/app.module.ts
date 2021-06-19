@@ -23,6 +23,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatTableModule} from '@angular/material/table';
 import {MatSortModule} from '@angular/material/sort';
 import { RendererParticleComponent } from './renderer-particle/renderer-particle.component';
+import { RendererPeriodicComponent } from './renderer-periodic/renderer-periodic.component';
 
 
 @NgModule({
@@ -53,7 +54,7 @@ import { RendererParticleComponent } from './renderer-particle/renderer-particle
     MatTableModule,
     MatSortModule,
   ],
-  providers: [RendererComponent, RendererParticleComponent],
+  providers: [RendererComponent, RendererParticleComponent, RendererPeriodicComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

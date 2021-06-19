@@ -4,6 +4,7 @@ import { CoronaComponent } from './corona/corona.component';
 import { HomeComponent } from './home/home.component';
 import { ImpfungComponent } from './impfung/impfung.component';
 import { RendererComponent } from './renderer/renderer.component';
+import { RendererPeriodicComponent } from './renderer-periodic/renderer-periodic.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -17,4 +18,4 @@ const routes: Routes = [
 })
 export class AppRoutingModule { }
 
-export const routingComponents = [HomeComponent,RendererComponent]
+export const routingComponents = [HomeComponent,RendererComponent,RendererPeriodicComponent]

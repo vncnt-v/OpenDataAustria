@@ -59,19 +59,19 @@ export class RendererParticleComponent {
       const intersects = raycaster.intersectObjects( RendererParticleComponent.scene.children, true );
       if (intersects.length > 0 && intersects[0]) {
         if (INTERSECTED != intersects[0].object){
-          //if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+          if ( INTERSECTED ) INTERSECTED.material.uniforms.color.value.setHex( INTERSECTED.currentHex );
           if (document.getElementById('info-text') != null){
             INTERSECTED = intersects[0].object;
-            document.getElementById('info-text').innerHTML = String(intersects[0].object.userData.name+"<br>"+intersects[0].object.userData.value);
+            document.getElementById('info-text').innerHTML = String(intersects[0].object.userData.name+"<br>"+Math.ceil(intersects[0].object.userData.value));
             document.getElementById('info-box').style.display = "block";
             document.getElementById('info-box').style.top = String(mouse_r.y)+"px";
             document.getElementById('info-box').style.left = String(mouse_r.x+10)+"px";
-            //INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-            //INTERSECTED.material.emissive.setHex( 0xff0000 );
+            INTERSECTED.currentHex = INTERSECTED.material.uniforms.color.value.getHex();
+            INTERSECTED.material.uniforms.color.value.setHex( 0xff0000 );
           }
         }
       } else {
-        //if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+        if ( INTERSECTED ) INTERSECTED.material.uniforms.color.value.setHex( INTERSECTED.currentHex );
         INTERSECTED = null;
         if (document.getElementById('info-text') != null){
           document.getElementById('info-box').style.display = "none";
@@ -131,7 +131,6 @@ export class RendererParticleComponent {
       vertices.push( parent_x, parent_y, parent_z );
       size.push(8);
       material = new THREE.ShaderMaterial( {
-
         uniforms: {
           color: { value: new THREE.Color( 0x2ade36 ) },
         },
@@ -143,7 +142,6 @@ export class RendererParticleComponent {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geometry.setAttribute( 'scale', new THREE.Float32BufferAttribute( size, 1 ) );
-    //const material = new THREE.PointsMaterial( { color: 0xFF0000 } );
     
     const points = new THREE.Points( geometry, material );
     points.userData.name = name;

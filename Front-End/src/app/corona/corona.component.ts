@@ -122,7 +122,7 @@ export class CoronaComponent implements OnInit {
       var bezirk = bezirke[i+1].split(';');
       var value = CoronaComponent.calculateValue(dataID,bezirk);
       RendererParticleComponent.createPoint(value,bezirk[0]);
-      tableDataBezirk.push({name: bezirk[0], count: value});
+      tableDataBezirk.push({name: bezirk[0], count: Math.ceil(value)});
     }
     const table = tableDataBezirk.slice();
     CoronaComponent.sortedData = table.sort((a, b) => {
@@ -209,7 +209,7 @@ export class CoronaComponent implements OnInit {
         nextBiggerScale = bundeslandMax[id];
         var value_scaled = (value/100*(400/(nextBiggerScale/100)));
         CoronaComponent.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[0],value,id,false);
-        tableDataBezirk.push({id: id,name: bezirk[0], count: value});
+        tableDataBezirk.push({id: id,name: bezirk[0], count: Math.ceil(value)});
       }
       var b_coordinates = [[48.305908,14.286198],[47.26543,11.392769],[47.070868,15.438279],[47.838758,16.536216],[48.193315,15.619872],[48.208354,16.372504],[46.622816,14.30796],[47.502578,9.747292],[47.798135,13.046481]];
       var b_names = ["Oberösterreich","Tirol","Steiermark","Burgenland","Niederösterreich","Wien","Kärten","Vorarlberg","Salzburg"];
@@ -223,7 +223,7 @@ export class CoronaComponent implements OnInit {
       nextBiggerScale = CoronaComponent.calculateNextBiggerScale(maxBundesland);
       for (var i = 0; i < bundeslaender_count.length; i++){
         CoronaComponent.visualizeEntry(b_coordinates[i][0],b_coordinates[i][1],bundeslaender_count[i]/100*(400/(nextBiggerScale/100)),b_names[i],bundeslaender_count[i],i,true);
-        tableDataBundesland.push({name: b_names[i], count: bundeslaender_count[i]});
+        tableDataBundesland.push({name: b_names[i], count: Math.ceil(bundeslaender_count[i])});
       }
       //scene.add(assets);
       MapService.setMaxValue(nextBiggerScale,bundeslandMax);

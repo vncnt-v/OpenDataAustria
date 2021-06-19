@@ -85,7 +85,7 @@ export class RendererComponent {
             if (document.getElementById('info-text') != null){
               
               INTERSECTEDDATA = intersectsData[i].object;
-              document.getElementById('info-text').innerHTML = String(intersectsData[i].object.userData.name+"<br>"+intersectsData[i].object.userData.value);
+              document.getElementById('info-text').innerHTML = String(intersectsData[i].object.userData.name+"<br>"+Math.ceil(intersectsData[i].object.userData.value));
               document.getElementById('info-box').style.display = "block";
               document.getElementById('info-box').style.top = String(mouse_r.y)+"px";
               document.getElementById('info-box').style.left = String(mouse_r.x+10)+"px";

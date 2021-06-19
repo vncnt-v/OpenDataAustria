@@ -3,7 +3,7 @@
   flex-basis: 0;
 }
 .visual-style {
-  top: 5px;
+  top: 7px;
   position: absolute;
   left: 50%;
 }
@@ -33,8 +33,11 @@
   .right {
     display: none;
   }
+}
+@media (max-width: 967.98px) { 
   .visual-style {
-    bottom: 0;
+    top: unset;
+    bottom: 7px;
   }
 }
 .right {

@@ -9,12 +9,11 @@ import {Sort} from '@angular/material/sort';
 import { RendererParticleComponent } from '../renderer-particle/renderer-particle.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RendererPeriodicComponent } from '../renderer-periodic/renderer-periodic.component';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
-let assets;
 var deltaX = 730;
 var deltaY = 2600;
 var factor = 55;
-var scene;
 var storage;
 var bundeslaender_count = [0,0,0,0,0,0,0,0,0];
 var bundeslandMax = [0,0,0,0,0,0,0,0,0];
@@ -31,7 +30,6 @@ export interface TableElement {
   count: number;
 }
 
-const tableData: TableElement[] = [];
 var tableDataBundesland = [];
 var tableDataBezirk = [];
 var tableDataBezirkSelected = [];
@@ -57,7 +55,7 @@ export class CoronaComponent implements OnInit {
     if (param != null){
       if (param == "particle"){
         this.visual_particle = true;
-        this.renderer_particle.start(this);
+        this.renderer_particle.start();
         this.getData().subscribe(data =>
           this.saveData(data)
         );
@@ -68,11 +66,13 @@ export class CoronaComponent implements OnInit {
         );
       } else {
         this.visual_map = true;
-        this.renderer.start(this);
+        this.renderer.start();
+        this.setUp();
       }
     } else {
       this.visual_map = true;
-      this.renderer.start(this);
+      this.renderer.start();
+      this.setUp();
     }
   }
 
@@ -114,11 +114,7 @@ export class CoronaComponent implements OnInit {
     return this.http.get('/corona-data', {responseType: 'text'});
   }
 
-  getObjects(){
-    return assets;
-  }
-  setUp(sceneTmp) {
-    scene = sceneTmp;
+  setUp() {
     this.getData().subscribe(data =>
       this.saveData(data)
     );
@@ -163,10 +159,8 @@ export class CoronaComponent implements OnInit {
     this.table.renderRows();
   }
   visualizeData(dataID) {
-    //scene.remove(assets);
     RendererComponent.bezirkDataGroup.clear();
     RendererComponent.bundeslandDataGroup.clear();
-    assets = new THREE.Group();
 
       // CovidFaelle_GKZ.csv bezirke durch Newlines getrennt
       var bezirke = storage.split('\n');

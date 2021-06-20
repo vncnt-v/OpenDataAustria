@@ -81,7 +81,7 @@
 mat-slider {
   width: 300px;
 }
-mat-form-field{
+mat-form-field {
   width: 300px;
 }
 .home-button {
@@ -89,7 +89,7 @@ mat-form-field{
   position: absolute;
   right: 1em;
   bottom: 1em;
-  z-index: 50;
+  z-index: 150;
 }
 .white-icon {
   color: #d0d0d0;

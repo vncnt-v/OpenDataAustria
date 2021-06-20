@@ -2,7 +2,60 @@
 .example-headers-align .mat-expansion-panel-header-description {
   flex-basis: 0;
 }
+.visual-style {
+  top: 7px;
+  position: absolute;
+  left: 50%;
+  z-index: 100;
+}
+.cdk-column-name {
+  padding-right: 5px;
+}
+.btn-container {
+  position: relative;
+  left: -50%;
+}
+.visual-btn {
+  width: 90px;
+}
+#visual-map {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+#visual-particle {
+  border-radius: 0;
+}
+#visual-periodic {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.visual-btn.active {
+  background-color: rgb(34, 34, 34);
+}
 
+@media (max-width: 767.98px) { 
+  .right {
+    display: none;
+  }
+}
+@media (max-width: 967.98px) { 
+  .visual-style {
+    top: unset;
+    bottom: 7px;
+  }
+}
+.right {
+  right: 0;
+}
+.full{
+  height: calc(100vh - 80px);
+  overflow: scroll;
+}
+.mat-table {
+  background: unset!important;
+  width: 280px;
+  margin-bottom: 80px;
+}
 .example-headers-align .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;

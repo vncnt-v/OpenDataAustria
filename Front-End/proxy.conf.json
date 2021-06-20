@@ -10,5 +10,13 @@
     "/impfung-data": {
         "target": "http://localhost:8000",
         "secure": false
+    },
+    "/police-data": {
+        "target": "http://localhost:8000",
+        "secure": false
+    },
+    "/badegewaesser-data": {
+        "target": "http://localhost:8000",
+        "secure": false
     }
   }

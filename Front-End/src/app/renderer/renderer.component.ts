@@ -24,7 +24,7 @@ export class RendererComponent {
   static selected = false;
   static selectedBundesland = 0;
 
-  start(request) {
+  start() {
     // Create new THREE JS Scene
     RendererComponent.scene = new THREE.Scene();
 
@@ -151,8 +151,10 @@ export class RendererComponent {
         var intersects = raycaster.intersectObjects(RendererComponent.scene.children, true);
         if (intersects.length > 0) {
           // Check if show Bundesland or show all
+          if (RendererComponent.bezirkDataGroup.children.length <= 0){
+            return;
+          }
           if(!RendererComponent.selected){
-
             RendererComponent.bundeslandDataGroup.visible = false;
             RendererComponent.bezirkDataGroup.visible = true;
             RendererComponent.bundeslandDataGroup.children.forEach(item => {
@@ -253,7 +255,6 @@ export class RendererComponent {
     RendererComponent.scene.add(RendererComponent.bundeslaenderGroup);
     RendererComponent.scene.add(RendererComponent.bundeslandDataGroup);
     RendererComponent.scene.add(RendererComponent.bezirkDataGroup);
-    request.setUp(RendererComponent.scene);
   }
 
   static addBezirk(entry: THREE.Mesh){

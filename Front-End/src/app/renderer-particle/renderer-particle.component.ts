@@ -15,7 +15,7 @@ export class RendererParticleComponent {
 
   constructor() { }
 
-  start(request) {
+  start() {
     this.setUpScene();
   }
 

@@ -1,34 +1,49 @@
 .home-container {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-}
-
-.sidenav {
+    width: 100%;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 25em;
-    border-right: 1px solid #dddddd33;
-    background: #222222;
-    padding: 5em 2em 0 2em;
 }
-.mat-card-avatar{
-    border-radius: 0;
-}
-.title{
+h1 {
     color: #f0f0f0;
     font-size: 50px;
     font-weight: 100;
     line-height: 1.1;
 }
-.content{
-    padding: 15em 5em 5em 5em;
-    background: #222222;
+h2 {
+    color: #f0f0f0;
+    font-size: 25px;
+    font-weight: 400;
+    margin-bottom: 0.5em;
+    margin-top: 1.5em;
 }
-
+.sidebar {
+    min-width: 20em;
+    background: #222222;
+    padding: 5em 2em 0 2em;
+}
+.sidebar h1 {
+    position: fixed;
+}
+.mobile-titel {
+    display: none;
+    width: 23em;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2em;
+}
+.row-container {
+    display: flex;
+    flex-flow: column;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+.content{
+    padding: 7em 5em 5em 5em;
+    background: #111;
+    flex-grow: 1;
+}
 .card {
     margin: 10px;
     width: 20em;
@@ -44,10 +59,12 @@
 .blue {
     background-color: #007acc;
 }
-.green {
-    background-color: #25b333;
+.police-blue {
+    background-color: #022157;
 }
-  
+.badegewaesser {
+    background-color: #2B5B80;
+}
 .virus-image {
     background-image: url("src/assets/img/virus-icon.png");
     background-size: cover;
@@ -56,9 +73,41 @@
     background-image: url("src/assets/img/impfung-icon.png");
     background-size: cover;
 }
+.police-image {
+    background-image: url("src/assets/img/police-icon.png");
+    background-size: cover;
+}
+.badegewaesser-image {
+    background-image: url("src/assets/img/badegewaesser-icon.png");
+    background-size: cover;
+}
 ul{
     margin-left: 1.5em;
 }
+@media (max-width: 1199.98px) { 
+    .sidebar {
+        display: none;
+    }
+    .mobile-titel{
+        display: block;
+    }
+    .content{
+        padding: 3em 2em 5em 2em;
+    }
+    .row-container {
+        align-items: center;
+        margin-left: auto;
+        margin-right:auto;
+    }
+    .row {
+        justify-content: center;
+    }
+}
+/*
+.mat-card-avatar{
+    border-radius: 0;
+}
+
 .mobile-title{
     display: none;
 }
@@ -80,4 +129,4 @@ ul{
         margin-bottom: 2em;
         display: block;
     }
-  }
+  }*/

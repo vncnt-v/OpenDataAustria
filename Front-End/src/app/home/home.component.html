@@ -1,38 +1,73 @@
-<mat-sidenav-container class="home-container">
-    <mat-sidenav #sidenav mode="side" opened class="sidenav">
-        <h1 class="title">Open<br>Data<br>Österreich 3D</h1>
-    </mat-sidenav>
-    <mat-sidenav-content class="content">
-        <div class="mobile-title"><h1 class="title">Open<br>Data<br>Österreich 3D</h1></div>
-        <mat-card [routerLink]="['/corona']" class="card red">
-            <mat-card-header>
-              <div mat-card-avatar class="virus-image"></div>
-              <mat-card-title>Corona Fälle</mat-card-title>
-              <mat-card-subtitle>Täglich aktuelle Daten</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-            <ul>
-                <li>Fälle 7 Tage</li>
-                <li>Gesamt Fälle</li>
-                <li>Gesamt Todeszahlen</li>
-                <li>Skalierbar auf 100.000</li>
-            </ul>  
-            </mat-card-content>
-        </mat-card>
-
-        <mat-card [routerLink]="['/impfung']" class="card blue">
-            <mat-card-header>
-              <div mat-card-avatar class="impfung-image"></div>
-              <mat-card-title>Corona Impfungen</mat-card-title>
-              <mat-card-subtitle>Täglich aktuelle Daten</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
+<div class="home-container">
+<div class="sidebar m-none">
+    <h1 class="title">Open<br>Data<br>Österreich 3D</h1>
+</div>
+<div class="content">
+    <div class="mobile-titel"><h1 class="title">Open<br>Data<br>Österreich 3D</h1></div>
+    <div class="row-container">
+        <h2>Covid 19</h2>
+        <div class="row">
+            <mat-card [routerLink]="['/corona']" class="card red">
+                <mat-card-header>
+                <div mat-card-avatar class="virus-image"></div>
+                <mat-card-title>Corona Fälle</mat-card-title>
+                <mat-card-subtitle>Täglich aktuelle Daten</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
                 <ul>
-                    <li>Auslieferungen</li>
-                    <li>Bestellungen</li>
-                    <li>Skalierbar auf 100</li>
+                    <li>Fälle 7 Tage</li>
+                    <li>Gesamt Fälle</li>
+                    <li>Gesamt Todeszahlen</li>
+                    <li>Skalierbar auf 100.000</li>
                 </ul>  
-            </mat-card-content>
-        </mat-card>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card [routerLink]="['/impfung']" class="card blue">
+                <mat-card-header>
+                <div mat-card-avatar class="impfung-image"></div>
+                <mat-card-title>Corona Impfungen</mat-card-title>
+                <mat-card-subtitle>Täglich aktuelle Daten</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                    <ul>
+                        <li>Auslieferungen</li>
+                        <li>Bestellungen</li>
+                        <li>Skalierbar auf 100</li>
+                    </ul>  
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+    <div class="row-container">
+        <h2>Institutionen</h2>
+        <div class="row">
+            <mat-card [routerLink]="['/police']" class="card police-blue">
+                <mat-card-header>
+                <div mat-card-avatar class="police-image"></div>
+                <mat-card-title>Polizei</mat-card-title>
+                <mat-card-subtitle>Dienstellen in Österreich</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+    <div class="row-container">
+        <h2>Gewässer</h2>
+        <div class="row">
+            <mat-card [routerLink]="['/badegewaesser']" class="card badegewaesser">
+                <mat-card-header>
+                <div mat-card-avatar class="badegewaesser-image"></div>
+                <mat-card-title>Badegewässer</mat-card-title>
+                <mat-card-subtitle>Badegewässer in Österreich</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+</div>

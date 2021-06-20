@@ -24,6 +24,8 @@ import {MatTableModule} from '@angular/material/table';
 import {MatSortModule} from '@angular/material/sort';
 import { RendererParticleComponent } from './renderer-particle/renderer-particle.component';
 import { RendererPeriodicComponent } from './renderer-periodic/renderer-periodic.component';
+import { PolicestationsComponent } from './policestations/policestations.component';
+import { BadegewaesserComponent } from './badegewaesser/badegewaesser.component';
 
 
 @NgModule({
@@ -33,6 +35,8 @@ import { RendererPeriodicComponent } from './renderer-periodic/renderer-periodic
     ImpfungComponent,
     CoronaComponent,
     HomeComponent,
+    PolicestationsComponent,
+    BadegewaesserComponent,
   ],
   imports: [
     BrowserModule,

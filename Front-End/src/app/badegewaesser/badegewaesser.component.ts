@@ -4,9 +4,11 @@ import { Sort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as THREE from 'three';
+import { CoronaComponent } from '../corona/corona.component';
 import { RendererParticleComponent } from '../renderer-particle/renderer-particle.component';
 import { RendererPeriodicComponent } from '../renderer-periodic/renderer-periodic.component';
 import { RendererComponent } from '../renderer/renderer.component';
+import { MapService } from '../services/map.service';
 
 var deltaX = 730;
 var deltaY = 2600;
@@ -15,6 +17,9 @@ var param;
 // Bundesland, Name, Bezirk, Gemeinde, Latitude, Longitude, Qualitaet 2017, Qualitaet 2018, Qualitaet 2019, Qualitaet 2020, Qualitaet 2021
 var badegewaesser = [];
 var tableData = [];
+var bundeslandValue = [0,0,0,0,0,0,0,0,0];
+var bundeslandMax = [0,0,0,0,0,0,0,0,0];
+var tableDataBundesland = [];
 
 export interface TableElement {
   name: string;
@@ -118,15 +123,116 @@ export class BadegewaesserComponent implements OnInit {
   }
 
   visualizeData() {
-    // ToDo
+    RendererComponent.bezirkDataGroup.clear();
+    RendererComponent.bundeslandDataGroup.clear();
+    var b_coordinates = [[48.305908,14.286198],[47.26543,11.392769],[47.070868,15.438279],[47.838758,16.536216],[48.193315,15.619872],[48.208354,16.372504],[46.622816,14.30796],[47.502578,9.747292],[47.798135,13.046481]];
+    var b_names = ["Oberösterreich","Tirol","Steiermark","Burgenland","Niederösterreich","Wien","Kärten","Vorarlberg","Salzburg"];
+    var nextBiggerScale = 0;
+    tableDataBundesland = [];
+    bundeslandMax = [0,0,0,0,0,0,0,0,0];
+    var maxBundesland = 0;
+    this.groupValues();
+    bundeslandValue.forEach(element => {
+      if (maxBundesland < element) {
+        maxBundesland = element;
+      }
+    });
+    nextBiggerScale = CoronaComponent.calculateNextBiggerScale(maxBundesland);
+    var speicher=bundeslandValue[0];
+    bundeslandValue[0]=bundeslandValue[3];
+    bundeslandValue[3]=speicher;
+    speicher=bundeslandValue[1];
+    bundeslandValue[1]=bundeslandValue[5];
+    bundeslandValue[5]=bundeslandValue[8];
+    bundeslandValue[8]=bundeslandValue[6];
+    bundeslandValue[6]=speicher;
+      
+    for (var i = 0; i < bundeslandValue.length; i++){
+      CoronaComponent.visualizeEntry(b_coordinates[i][0],b_coordinates[i][1],bundeslandValue[i]/100*(400/(nextBiggerScale/100)),b_names[i],bundeslandValue[i],i,true);
+      tableDataBundesland.push({name: b_names[i], count: Math.ceil(bundeslandValue[i])});
+    }
+    //scene.add(assets);
+    MapService.setMaxValue(nextBiggerScale,bundeslandMax);
+    
+    const data = tableDataBundesland.slice();
+
+    this.table.renderRows();
+  }
+
+  visualizeEntry(element) {
+    
+
+    /*let m_coronaData = new THREE.MeshLambertMaterial( {color: 0xffffff, transparent: true, opacity: 0.7, emissive: 0xffffff} );
+    
+    var geometry = new THREE.BoxGeometry( 2, 2, 15);
+    var cube = new THREE.Mesh( geometry, m_coronaData );
+    cube.position.z = 10/2;
+    cube.position.y = element.lat * factor - deltaY;
+    cube.position.x = element.long * factor - deltaX;
+    cube.layers.set(2);
+    cube.userData.name = element.plz;
+    cube.userData.value = element.artLang;
+    RendererComponent.addBundesland(cube);*/
+  }
+  static scaleEntry(lat,long,height,name,value,id,bundesland){
+
+  }
+
+  groupValues(){
+    badegewaesser.forEach(element => {
+      if(element.bundesland=="Burgenland"){
+        bundeslandValue[0]++;
+      }
+      else if(element.bundesland=="Kärnten"){
+        bundeslandValue[1]++;
+      }
+      else if(element.bundesland=="Niederösterreich"){
+        bundeslandValue[2]++;
+      }
+      else if(element.bundesland=="Oberösterreich"){
+        bundeslandValue[3]++;
+      }
+      else if(element.bundesland=="Tirol"){
+        bundeslandValue[4]++;
+      }
+      else if(element.bundesland=="Steiermark"){
+        bundeslandValue[5]++;
+      }
+      else if(element.bundesland=="Salzburg"){
+        bundeslandValue[6]++;
+      }
+      else if(element.bundesland=="Vorarlberg"){
+        bundeslandValue[7]++;
+      }
+      else if(element.bundesland=="Wien"){
+        bundeslandValue[8]++;
+      }
+    });
   }
 
   visualizeParticle() {
-    // ToDo
+    RendererParticleComponent.deletePoints();
+    var bundeslandName = ["Burgenland","Kärnten","Niederösterreich","Oberösterreich","Tirol","Steiermark","Salzburg","Vorarlberg","Wien"];
+    this.groupValues();
+    tableData = [];
+    for(var i = 0; i < bundeslandValue.length; i++) {
+      RendererParticleComponent.createPoint(bundeslandValue[i],bundeslandName[i]);
+      tableData.push({name: bundeslandName[i],count: bundeslandValue[i]});
+    }
+    this.table.renderRows();
   }
 
   visualizePeriodic() {
-    // ToDo
+    var tableDataBundesland = [];
+      var bundeslandName = ["Burgenland","Kärnten","Niederösterreich","Oberösterreich","Tirol","Steiermark","Salzburg","Vorarlberg","Wien"];
+      this.groupValues();
+      tableData = [];
+      for (var i = 0; i < bundeslandValue.length; i++){
+        tableData.push({name: bundeslandName[i],count: Math.ceil(bundeslandValue[i])});
+        tableDataBundesland.push({name: bundeslandName[i], count: Math.ceil(bundeslandValue[i])});
+      }
+      const sortPeriodicData = tableDataBundesland.slice();
+      this.renderer_periodic.Init(sortPeriodicData);
   }
 
   sortData(sort: Sort) {

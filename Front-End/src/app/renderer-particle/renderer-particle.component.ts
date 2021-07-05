@@ -107,16 +107,24 @@ export class RendererParticleComponent {
     RendererParticleComponent.pointsGroup.clear();
   }
 
-  static createPoint(value: number, name: string){
+  static createPoint(value: number, name: string, maxValue: number){
+    var valueText = value;
+    if (maxValue > 10000){
+      value = (value/(maxValue/100)) * 100
+    }
     const vertices = [];
     const size = [];
     const parent_x = THREE.MathUtils.randFloatSpread( 500 );
     const parent_y = THREE.MathUtils.randFloatSpread( 500 );
     const parent_z = THREE.MathUtils.randFloatSpread( 500 );
+    var maxRandom = 1000;
+    if (value < maxRandom){
+      maxRandom = value;
+    }
     for ( let i = 0; i < value; i ++ ) {
-      const x = THREE.MathUtils.randFloatSpread( 10 + value / 10);
-      const y = THREE.MathUtils.randFloatSpread( 10 + value / 10);
-      const z = THREE.MathUtils.randFloatSpread( 10 + value / 10);
+      const x = THREE.MathUtils.randFloatSpread( 10 + maxRandom / 10);
+      const y = THREE.MathUtils.randFloatSpread( 10 + maxRandom / 10);
+      const z = THREE.MathUtils.randFloatSpread( 10 + maxRandom / 10);
       vertices.push( x+parent_x, y+parent_y, z+parent_z );
       size.push(5);
     }
@@ -145,7 +153,7 @@ export class RendererParticleComponent {
     
     const points = new THREE.Points( geometry, material );
     points.userData.name = name;
-    points.userData.value = value;
+    points.userData.value = valueText;
     points.layers.set(1);
     this.pointsGroup.add(points);
   }

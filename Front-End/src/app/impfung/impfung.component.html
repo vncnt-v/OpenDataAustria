@@ -2,6 +2,7 @@
 <div *ngIf="visual_periodic">
   <app-renderer-periodic></app-renderer-periodic>
 </div>
+<div *ngIf="!visual_periodic">
 <mat-accordion class="example-headers-align" multi>
     <mat-expansion-panel>
         <mat-expansion-panel-header>
@@ -38,6 +39,7 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
+  </div>
     <mat-accordion class="example-headers-align right" multi>
       <mat-expansion-panel>
         <mat-expansion-panel-header>

@@ -3,6 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
+import { element } from 'protractor';
 import * as THREE from 'three';
 import { RendererParticleComponent } from '../renderer-particle/renderer-particle.component';
 import { RendererPeriodicComponent } from '../renderer-periodic/renderer-periodic.component';
@@ -46,7 +47,7 @@ export class PolicestationsComponent implements OnInit {
       this.visual_periodic = true;
     } else {
       this.visual_map = true;
-      this.renderer.start();
+      this.renderer.start(false);
     }
     this.getData().subscribe(data =>
       this.saveData(data)
@@ -122,13 +123,26 @@ export class PolicestationsComponent implements OnInit {
     RendererComponent.bundeslandDataGroup.clear();
     tableData = [];
     storage.forEach(element => {
-      this.visualizeEntry(element);
-      tableData.push({name: element.name,count: element.artLang});
+      this.visualizeEntry(element.landID,1,element.name,element.y,element.x,false);
     });
+    var bundeslandValue = [0,0,0,0,0,0,0,0,0];
+    var bundeslandName = ["Burgenland","Kärnten","Niederösterreich","Oberösterreich","Tirol","Steiermark","Salzburg","Vorarlberg","Wien"];
+    storage.forEach(element => {
+      bundeslandValue[element.landID-1]++;
+    });
+    var b_coordinates = [[47.838758,16.536216],[46.622816,14.30796],[48.193315,15.619872],[48.305908,14.286198],[47.26543,11.392769],[47.070868,15.438279],[47.798135,13.046481],[47.502578,9.747292],[48.208354,16.372504]];
+    for(var i = 0; i < bundeslandValue.length; i++) {
+      this.visualizeEntry(-1,bundeslandValue[i],bundeslandName[i],b_coordinates[i][0],b_coordinates[i][1],true);
+      tableData.push({name: bundeslandName[i],count: bundeslandValue[i]});
+    }
     PolicestationsComponent.sortedData = tableData.slice().sort((a, b) => {
       return PolicestationsComponent.compare(a.count, b.count, false);
     });
     this.table.renderRows();
+    // PolicestationsComponent.sortedData = tableData.slice().sort((a, b) => {
+    //   return PolicestationsComponent.compare(a.count, b.count, false);
+    // });
+    // this.table.renderRows();
   }
 
   visualizeParticle() {
@@ -140,7 +154,7 @@ export class PolicestationsComponent implements OnInit {
     });
     tableData = [];
     for(var i = 0; i < bundeslandValue.length; i++) {
-      RendererParticleComponent.createPoint(bundeslandValue[i],bundeslandName[i]);
+      RendererParticleComponent.createPoint(bundeslandValue[i],bundeslandName[i],5000);
       tableData.push({name: bundeslandName[i],count: bundeslandValue[i]});
     }
     PolicestationsComponent.sortedData = tableData.slice().sort((a, b) => {
@@ -149,28 +163,47 @@ export class PolicestationsComponent implements OnInit {
     this.table.renderRows();
   }
 
-  visualizeEntry(element) {
-    let m_coronaData = new THREE.MeshLambertMaterial( {color: 0xffffff, transparent: true, opacity: 0.7, emissive: 0xffffff} );
-    if (element.artLang == 'Polizeiinspektion'){
-      m_coronaData = new THREE.MeshLambertMaterial( {color: 0x02F157, transparent: true, opacity: 0.7, emissive: 0x02F157} );
-    } else if (element.artLang == 'Landespolizeidirektion'){
-      m_coronaData = new THREE.MeshLambertMaterial( {color: 0x0221F7, transparent: true, opacity: 0.7, emissive: 0x0221F7} );
-    } else if (element.artLang == 'Bezirkspolizeikommando'){
-      m_coronaData = new THREE.MeshLambertMaterial( {color: 0xF221F7, transparent: true, opacity: 0.7, emissive: 0xF221F7} );
-    } else if (element.artLang == 'Polizeiinspektion/ Bezirksleitstelle'){
-      m_coronaData = new THREE.MeshLambertMaterial( {color: 0x022FF7, transparent: true, opacity: 0.7, emissive: 0x022FF7} );
-    } else {
-      console.log(element.artLang);
+  visualizeEntry(id,value,name,x,y,bundesland) {
+    let m_coronaData = new THREE.MeshLambertMaterial( {color: 0x0221F7, transparent: true, opacity: 0.7, emissive: 0x0221F7} );
+    var geometry = new THREE.BoxGeometry( 5, 5, value);
+    if (!bundesland){
+      geometry = new THREE.BoxGeometry( 2, 2, value);
     }
-    var geometry = new THREE.BoxGeometry( 2, 2, 15);
     var cube = new THREE.Mesh( geometry, m_coronaData );
-    cube.position.z = 10/2;
-    cube.position.y = element.y * factor - deltaY;
-    cube.position.x = element.x * factor - deltaX;
-    cube.layers.set(2);
-    cube.userData.name = element.plz;
-    cube.userData.value = element.artLang;
-    RendererComponent.addBundesland(cube);
+    cube.position.z = value/2;
+    cube.position.y = x * factor - deltaY;
+    cube.position.x = y * factor - deltaX;
+    cube.layers.set(3);
+    if (id == 0){
+      id = 4;
+      // Burgenland
+    } else if (id == 1){
+      id = 3;
+    } else if (id == 2){
+      id = 6;
+    } else if (id == 3){
+      id = 4;
+    } else if (id == 4){
+      id = 0;
+    } else if (id == 5){
+      id = 8;
+    } else if (id == 6){
+      id = 2;
+    } else if (id == 7){
+      id = 1;
+    } else if (id == 8){
+      id = 7;
+    } else if (id == 9){
+      id = 5;
+    }
+    cube.userData.id = id;
+    cube.userData.name = name;
+    cube.userData.value = value;
+    if (bundesland){
+      RendererComponent.addBundesland(cube);
+    } else {
+      RendererComponent.addBezirk(cube);
+    }
   }
 
   sortData(sort: Sort) {

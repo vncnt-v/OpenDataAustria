@@ -89,11 +89,13 @@ mat-form-field{
   position: absolute;
   right: 1em;
   bottom: 1em;
+  z-index: 150;
 }
 .white-icon {
   color: #d0d0d0;
 }
 #date{
+  display: none;
   color: #555555;
   position: absolute;
   left: 2em;

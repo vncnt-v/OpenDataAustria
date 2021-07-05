@@ -3,7 +3,7 @@ module.exports = {
         var http = require('https');
         var options = {
             host: 'info.gesundheitsministerium.gv.at',
-            path: '/data/laender.csv'
+            path: '/data/timeline-bbg.csv'
         }
         var request = http.request(options, function (res) {
             var data = '';

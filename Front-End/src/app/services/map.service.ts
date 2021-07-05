@@ -26,6 +26,7 @@ var axes_lable;
 var maxValue;
 var bundeslandMaxValue = [];
 var currentZ = 125;
+var noScala = false;
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +40,8 @@ export class MapService {
     return this.http.get('/map-data', {responseType: 'text'});
   }
 
-  setUp() {
+  setUp(b_noScala) {
+    noScala = b_noScala;
     scene = RendererComponent.scene;
     this.getData().subscribe(data =>
       this.visualizeData(data)
@@ -78,18 +80,18 @@ export class MapService {
         }
     }
     //Scala
-    this.drawZeroScala();
-    this.drawNormalScala();
-    this.drawMiniScala();
-    scala.visible = true;
-    axes.add(axes_filled);
-    // ToDo
-    // Übereinstimmung mit UI Slider
-    axes.position.z = 100;
-    axes_scala.position.z = 100;
+    if (noScala){
+      this.drawZeroScala();
+      this.drawNormalScala();
+      this.drawMiniScala();
+      scala.visible = true;
+      axes.add(axes_filled);
+      axes.position.z = 100;
+      axes_scala.position.z = 100;
+      scene.add( axes );
+      scene.add( scala );
+    }
     scene.add( map );
-    scene.add( axes );
-    scene.add( scala );
   }
 
   // Grundriss
@@ -209,7 +211,7 @@ export class MapService {
   // Setzt den Querschnitt auf z Koordinate
   static setAxes(value){
     axes_scala.remove(axes_lable);
-    this.createAxesLabel(value);
+    //this.createAxesLabel(value);
     axes.position.z = (value/100*(400/(500/100)));
     axes_scala.position.z = (value/100*(400/(500/100)));
     currentZ = value;
@@ -244,13 +246,15 @@ export class MapService {
 
   static createLables(value: number){
     scala.remove(lables);
-    lables = new THREE.Group;
-    this.drawLables("0",9.5,49,0);
-    this.drawLables((value*0.25).toString(),9.5,47.2,100);
-    this.drawLables((value*0.5).toString(),9.5,47.2,200);
-    this.drawLables((value*0.75).toString(),9.5,47.2,300);
-    this.drawLables((value).toString(),9.5,47.2,400);
-    scala.add(lables);
+    if (noScala){
+      lables = new THREE.Group;
+      this.drawLables("0",9.5,49,0);
+      this.drawLables((value*0.25).toString(),9.5,47.2,100);
+      this.drawLables((value*0.5).toString(),9.5,47.2,200);
+      this.drawLables((value*0.75).toString(),9.5,47.2,300);
+      this.drawLables((value).toString(),9.5,47.2,400);
+      scala.add(lables);
+    }
   }
 
   static drawLables(text: string,x ,y ,z ){
@@ -276,7 +280,7 @@ export class MapService {
     axes_scala.remove(axes_lable)
     const loader = new THREE.FontLoader();
     loader.load( 'https://threejs.org/examples/fonts/droid/droid_serif_bold.typeface.json', function ( font ) {
-      var geometry = new THREE.TextGeometry( (maxValue*(value/500)).toString(), {
+      var geometry = new THREE.TextGeometry( Math.ceil(maxValue*(value/500)).toString(), {
         font: font,
         size: 8,
         height: 0,

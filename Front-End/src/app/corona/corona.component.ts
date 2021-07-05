@@ -4,12 +4,10 @@ import * as THREE from 'three';
 import { MapService } from '../services/map.service';
 import { RendererComponent } from '../renderer/renderer.component';
 import {MatTable} from '@angular/material/table';
-import { TestBed } from '@angular/core/testing';
 import {Sort} from '@angular/material/sort';
 import { RendererParticleComponent } from '../renderer-particle/renderer-particle.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RendererPeriodicComponent } from '../renderer-periodic/renderer-periodic.component';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 var deltaX = 730;
 var deltaY = 2600;
@@ -66,16 +64,17 @@ export class CoronaComponent implements OnInit {
         );
       } else {
         this.visual_map = true;
-        this.renderer.start();
+        this.renderer.start(true);
         this.setUp();
       }
     } else {
       this.visual_map = true;
-      this.renderer.start();
+      this.renderer.start(true);
       this.setUp();
     }
   }
 
+  // HTML BTNs functions
   loadMap() {
     this.router.navigateByUrl('/', {skipLocationChange: true}).then(() => {
       window.location.href = '/corona?visual=map';
@@ -125,31 +124,45 @@ export class CoronaComponent implements OnInit {
     if (this.visual_particle){
       this.createParticle(5);
     } else if (this.visual_periodic){
-      var bezirke = storage.split('\n');
-      tableDataBezirk = [];
-      for (var i = 0; i < bezirke.length-1; i++){
-        var bezirk = bezirke[i+1].split(';');
-        var value = CoronaComponent.calculateValue(5,bezirk);
-        tableDataBezirk.push({name: bezirk[0], count: Math.ceil(value)});
-      }
-      const sortPeriodicData = tableDataBezirk.slice();
-      CoronaComponent.sortedData = sortPeriodicData.sort((a, b) => {
-        return CoronaComponent.compare(a.count, b.count, false);
-      });
-      this.renderer_periodic.Init(sortPeriodicData);
+      this.createPeriodic(5);
     } else {
       this.visualizeData(5);
     }
   }
 
-  createParticle(dataID) {
+  createPeriodic(dataID) {
     var bezirke = storage.split('\n');
-    RendererParticleComponent.deletePoints();
+    //RendererParticleComponent.deletePoints();
     tableDataBezirk = [];
     for (var i = 0; i < bezirke.length-1; i++){
       var bezirk = bezirke[i+1].split(';');
       var value = CoronaComponent.calculateValue(dataID,bezirk);
-      RendererParticleComponent.createPoint(value,bezirk[0]);
+      //RendererParticleComponent.createPoint(value,bezirk[0]);
+      tableDataBezirk.push({name: bezirk[0], count: Math.ceil(value)});
+    }
+    const sortPeriodicData = tableDataBezirk.slice();
+    CoronaComponent.sortedData = sortPeriodicData.sort((a, b) => {
+      return CoronaComponent.compare(a.count, b.count, false);
+    });
+    this.renderer_periodic.Init(sortPeriodicData);
+    this.table.renderRows();
+  }
+  createParticle(dataID) {
+    var bezirke = storage.split('\n');
+    RendererParticleComponent.deletePoints();
+    tableDataBezirk = [];
+    var maxValue = 0;
+    for (var i = 0; i < bezirke.length-1; i++){
+      var bezirk = bezirke[i+1].split(';');
+      var value = CoronaComponent.calculateValue(dataID,bezirk);
+      if (maxValue < value){
+        maxValue = value;
+      }
+    }
+    for (var i = 0; i < bezirke.length-1; i++){
+      var bezirk = bezirke[i+1].split(';');
+      var value = CoronaComponent.calculateValue(dataID,bezirk);
+      RendererParticleComponent.createPoint(value,bezirk[0],maxValue);
       tableDataBezirk.push({name: bezirk[0], count: Math.ceil(value)});
     }
     const table = tableDataBezirk.slice();
@@ -174,12 +187,19 @@ export class CoronaComponent implements OnInit {
       bundeslandMax = [0,0,0,0,0,0,0,0,0];
       tableDataBezirk = [];
       tableDataBundesland = [];
+      var bevBundesland = [0,0,0,0,0,0,0,0,0];
+      var tmpBevBundesland = 0;
       for (var i = 0; i < bezirke.length-1; i++){
         var bezirk = bezirke[i+1].split(';');
-        value = CoronaComponent.calculateValue(dataID,bezirk);
+        if (6 <= dataID && dataID <= 8){
+          value = CoronaComponent.calculateValue(dataID - 3,bezirk);
+          tmpBevBundesland = CoronaComponent.calculateValue(2,bezirk);
+        } else {
+          value = CoronaComponent.calculateValue(dataID,bezirk);
+        }
         var id = bezirk[1].charAt(0);
         if (id == 0){
-          id = 4;
+          // id = 4;
           // Burgenland
         } else if (id == 1){
           id = 3;
@@ -200,10 +220,16 @@ export class CoronaComponent implements OnInit {
         } else if (id == 9){
           id = 5;
         }
+        bevBundesland[id] += tmpBevBundesland;
         if (bundeslandMax[id] < value) {
           bundeslandMax[id] = CoronaComponent.calculateNextBiggerScale(value);
         }
         bundeslaender_count[id] += value;
+      }
+      if (6 <= dataID && dataID <= 8){
+        for (var i = 0; i < bundeslandMax.length; i++) {
+          bundeslandMax[i] = 0;
+        }
       }
       for (var i = 0; i < bezirke.length-1; i++){
         var bezirk = bezirke[i+1].split(';');
@@ -232,6 +258,11 @@ export class CoronaComponent implements OnInit {
           id = 5;
         }
         // Scale to max
+        if (6 <= dataID && dataID <= 8){
+          if (bundeslandMax[id] < value) {
+            bundeslandMax[id] = CoronaComponent.calculateNextBiggerScale(value);
+          }
+        }
         nextBiggerScale = bundeslandMax[id];
         var value_scaled = (value/100*(400/(nextBiggerScale/100)));
         CoronaComponent.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[0],value,id,false);
@@ -239,19 +270,30 @@ export class CoronaComponent implements OnInit {
       }
       var b_coordinates = [[48.305908,14.286198],[47.26543,11.392769],[47.070868,15.438279],[47.838758,16.536216],[48.193315,15.619872],[48.208354,16.372504],[46.622816,14.30796],[47.502578,9.747292],[47.798135,13.046481]];
       var b_names = ["Oberösterreich","Tirol","Steiermark","Burgenland","Niederösterreich","Wien","Kärten","Vorarlberg","Salzburg"];
-      
       var maxBundesland = 0;
-      bundeslaender_count.forEach(element => {
-        if (maxBundesland < element) {
-          maxBundesland = element;
+      if ( 6 <= dataID && dataID <= 8){
+        for (var i = 0; i < bundeslaender_count.length; i++) {
+          if (maxBundesland < bundeslaender_count[i]/bevBundesland[i]*100000) {
+            maxBundesland = bundeslaender_count[i]/bevBundesland[i]*100000;
+          }
         }
-      });
-      nextBiggerScale = CoronaComponent.calculateNextBiggerScale(maxBundesland);
-      for (var i = 0; i < bundeslaender_count.length; i++){
-        CoronaComponent.visualizeEntry(b_coordinates[i][0],b_coordinates[i][1],bundeslaender_count[i]/100*(400/(nextBiggerScale/100)),b_names[i],bundeslaender_count[i],i,true);
-        tableDataBundesland.push({name: b_names[i], count: Math.ceil(bundeslaender_count[i])});
+        nextBiggerScale = CoronaComponent.calculateNextBiggerScale(maxBundesland);
+        for (var i = 0; i < bundeslaender_count.length; i++){
+          CoronaComponent.visualizeEntry(b_coordinates[i][0],b_coordinates[i][1],bundeslaender_count[i]/bevBundesland[i]*100000/100*(400/(nextBiggerScale/100)),b_names[i],Math.ceil(bundeslaender_count[i]/bevBundesland[i]*100000),i,true);
+          tableDataBundesland.push({name: b_names[i], count: Math.ceil(bundeslaender_count[i]/bevBundesland[i]*100000)});
+        }
+      } else {
+        bundeslaender_count.forEach(element => {
+          if (maxBundesland < element) {
+            maxBundesland = element;
+          }
+        });
+        nextBiggerScale = CoronaComponent.calculateNextBiggerScale(maxBundesland);
+        for (var i = 0; i < bundeslaender_count.length; i++){
+          CoronaComponent.visualizeEntry(b_coordinates[i][0],b_coordinates[i][1],bundeslaender_count[i]/100*(400/(nextBiggerScale/100)),b_names[i],Math.ceil(bundeslaender_count[i]),i,true);
+          tableDataBundesland.push({name: b_names[i], count: Math.ceil(bundeslaender_count[i])});
+        }
       }
-      //scene.add(assets);
       MapService.setMaxValue(nextBiggerScale,bundeslandMax);
       
       const data = tableDataBundesland.slice();
@@ -405,8 +447,13 @@ export class CoronaComponent implements OnInit {
   disabledAxesOptions = true;
   
   // Wählt Datentyp aus und schaut ob Scale gesetzt ist, bzw schaltet Scale disable.
+  // 2 = Bevölkerung
+  // 3 = Infektionen gesamt 
+  // 4 = Todesfälle gesamt
+  // 5 = Infektionen 7 Tage
   selectData(event) {
     this.selectedData = event.value;
+    RendererComponent.showAll();
     if (this.selectedData == '2'){
       this.disabled = true;
     } else {
@@ -443,6 +490,7 @@ export class CoronaComponent implements OnInit {
 
   // Check Scale und welcher Datensatz gewählt wurde, keine Rechnung beim 2 (Bevölkerung)
   scaleTo100000(event){
+    RendererComponent.showAll();
     this.checkScale = event.checked;
     if (this.selectedData == '3' || this.selectedData == '6'){
       if (event.checked){
@@ -453,9 +501,9 @@ export class CoronaComponent implements OnInit {
         }
       } else {
         if (this.visual_particle){
-          this.createParticle(8);
+          this.createParticle(3);
         } else {
-          this.visualizeData(8);
+          this.visualizeData(3);
         }
       }
     } else if (this.selectedData == '4' || this.selectedData == '7'){
@@ -489,6 +537,7 @@ export class CoronaComponent implements OnInit {
     }
   }
 
+  // Achses
   toogleAxes(event) {
     if (event.checked){
       this.disabledAxesOptions = false;

@@ -24,7 +24,7 @@ export class RendererComponent {
   static selected = false;
   static selectedBundesland = 0;
 
-  start() {
+  start(scala) {
     // Create new THREE JS Scene
     RendererComponent.scene = new THREE.Scene();
 
@@ -249,14 +249,33 @@ export class RendererComponent {
       mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     })
 
-    // 
     render();
-    this.map.setUp();
+    if (scala){
+      this.map.setUp(true);
+    } else {
+      this.map.setUp(false);
+    }
+    
     RendererComponent.scene.add(RendererComponent.bundeslaenderGroup);
     RendererComponent.scene.add(RendererComponent.bundeslandDataGroup);
     RendererComponent.scene.add(RendererComponent.bezirkDataGroup);
   }
 
+  static showAll() {
+    RendererComponent.bezirkDataGroup.visible = false;
+      RendererComponent.bundeslandDataGroup.visible = true;
+      RendererComponent.bundeslaenderGroup.children.forEach(item => {
+        item.visible = true;
+      });
+      RendererComponent.bezirkDataGroup.children.forEach(item => {
+        item.visible = false;
+      });
+      RendererComponent.bundeslandDataGroup.children.forEach(item => {
+        item.visible = true;
+      });
+      RendererComponent.selected = false;
+      document.getElementById('show-all-button').classList.add("hide");
+  }
   static addBezirk(entry: THREE.Mesh){
     if (RendererComponent.selected) {
       if (entry.userData.id != RendererComponent.selectedBundesland){

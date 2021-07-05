@@ -15,6 +15,7 @@ var deltaY = 2600;
 var factor = 55;
 var storage;
 var param; 
+var tableData = [];
 
 interface Data {
   value: string;
@@ -25,8 +26,6 @@ export interface TableElement {
   name: string;
   count: number;
 }
-
-var tableDataBundesland = [];
 
 @Component({
   selector: 'app-impfung',
@@ -60,12 +59,12 @@ export class ImpfungComponent implements OnInit {
         );
       } else {
         this.visual_map = true;
-        this.renderer.start();
+        this.renderer.start(true);
         this.setUp();
       }
     } else {
       this.visual_map = true;
-      this.renderer.start();
+      this.renderer.start(true);
       this.setUp();
     }
   }
@@ -93,9 +92,8 @@ export class ImpfungComponent implements OnInit {
   @ViewChild(MatTable) table: MatTable<TableElement>;
 
   data: Data[] = [
-    {value: '1', viewValue: 'Auslieferungen'},
-    {value: '3', viewValue: 'Bestellungen'},
-    {value: '5', viewValue: 'Bevölkerung'}
+    {value: '0', viewValue: 'Auslieferungen'},
+    {value: '2', viewValue: 'Bestellungen'}
   ];
   selectedData = this.data[0].value;
 
@@ -116,37 +114,106 @@ export class ImpfungComponent implements OnInit {
   saveData(data){
     storage = data;
     if (this.visual_particle){
-      this.createParticle(5);
+      this.createParticle(0);
     } else if (this.visual_periodic){
-      var bezirke = storage.split('\n');
-      tableDataBundesland = [];
-      for (var i = 0; i < bezirke.length-1; i++){
-        var bezirk = bezirke[i+1].split(';');
-        var value = ImpfungComponent.calculateValue(1,bezirk);
-        tableDataBundesland.push({name: bezirk[0], count: Math.ceil(value)});
-      }
-      const sortPeriodicData = tableDataBundesland.slice();
-      ImpfungComponent.sortedData = sortPeriodicData.sort((a, b) => {
-        return ImpfungComponent.compare(a.count, b.count, false);
-      });
-      this.renderer_periodic.Init(sortPeriodicData);
+      this.createPeriodic(0);
     } else {
-      this.visualizeData(1);
+      this.visualizeData(0);
     }
   }
 
-  createParticle(dataID) {
+  createPeriodic(dataID) {
     var bezirke = storage.split('\n');
-    RendererParticleComponent.deletePoints();
-    tableDataBundesland = [];
-    for (var i = 0; i < bezirke.length-1; i++){
-      var bezirk = bezirke[i+1].split(';');
-      var value = ImpfungComponent.calculateValue(dataID,bezirk);
-      RendererParticleComponent.createPoint(value,bezirk[0]);
-      tableDataBundesland.push({name: bezirk[0], count: Math.ceil(value)});
+    var bundeslaender = [];
+    for(var i = bezirke.length-1; i >= 0; i--) {
+      var bezirk = bezirke[i].split(';');
+      var tmp = false;
+      bundeslaender.forEach(element => {
+        if (element.id == bezirk[1]){
+          tmp = true;
+        }
+      });
+      if(!tmp && 1 <= bezirk[1] && bezirk[1] <= 9){
+        bundeslaender.push({name: bezirk[3],id: bezirk[1],auslieferungen: bezirk[4], auslieferungenpro100: bezirk[5], bestellungen: bezirk[6], bestellungenpro100: bezirk[7]});
+      }
+      if (bundeslaender.length >= 9) {
+        break;
+      }
     }
-    const table = tableDataBundesland.slice();
-    ImpfungComponent.sortedData = table.sort((a, b) => {
+    tableData = [];
+    for (var i = 0; i < bundeslaender.length; i++) {
+      var value = 0;
+      if (dataID == 0){
+        value = bundeslaender[i].auslieferungen;
+      } else if (dataID == 1) {
+        value = bundeslaender[i].auslieferungenpro100;
+      } else if (dataID == 2) {
+        value = bundeslaender[i].bestellungen;
+      } else if (dataID == 3) {
+        value = bundeslaender[i].bestellungenpro100;
+      }
+      tableData.push({name: bundeslaender[i].name,count: Math.ceil(value)});
+    }
+
+    const sortPeriodicData = tableData.slice();
+    ImpfungComponent.sortedData = sortPeriodicData.sort((a, b) => {
+      return ImpfungComponent.compare(a.count, b.count, false);
+    });
+    this.renderer_periodic.Init(sortPeriodicData);
+    this.table.renderRows();
+  }
+
+  createParticle(dataID) {
+    RendererParticleComponent.deletePoints();
+    var bezirke = storage.split('\n');
+    var bundeslaender = [];
+    for(var i = bezirke.length-1; i >= 0; i--) {
+      var bezirk = bezirke[i].split(';');
+      var tmp = false;
+      bundeslaender.forEach(element => {
+        if (element.id == bezirk[1]){
+          tmp = true;
+        }
+      });
+      if(!tmp && 1 <= bezirk[1] && bezirk[1] <= 9){
+        bundeslaender.push({name: bezirk[3],id: bezirk[1],auslieferungen: bezirk[4], auslieferungenpro100: bezirk[5], bestellungen: bezirk[6], bestellungenpro100: bezirk[7]});
+      }
+      if (bundeslaender.length >= 9) {
+        break;
+      }
+    }
+    var maxValue = 0;
+    bundeslaender.forEach(element => {
+      var value = 0;
+      if (dataID == 0){
+        value = element.auslieferungen;
+      } else if (dataID == 1) {
+        value = element.auslieferungenpro100;
+      } else if (dataID == 2) {
+        value = element.bestellungen;
+      } else if (dataID == 3) {
+        value = element.bestellungenpro100;
+      }
+      if (maxValue < element.auslieferungen){
+        maxValue = value;
+      }
+    });
+    tableData = [];
+    for (var i = 0; i < bundeslaender.length; i++) {
+      var value = 0;
+      if (dataID == 0){
+        value = bundeslaender[i].auslieferungen;
+      } else if (dataID == 1) {
+        value = bundeslaender[i].auslieferungenpro100;
+      } else if (dataID == 2) {
+        value = bundeslaender[i].bestellungen;
+      } else if (dataID == 3) {
+        value = bundeslaender[i].bestellungenpro100;
+      }
+      RendererParticleComponent.createPoint(value,bundeslaender[i].name,maxValue);
+      tableData.push({name: bundeslaender[i].name,count: Math.ceil(value)});
+    }
+    ImpfungComponent.sortedData = tableData.slice().sort((a, b) => {
       return ImpfungComponent.compare(a.count, b.count, false);
     });
     this.table.renderRows();
@@ -155,42 +222,103 @@ export class ImpfungComponent implements OnInit {
   visualizeData(dataID) {
     RendererComponent.bezirkDataGroup.clear();
     RendererComponent.bundeslandDataGroup.clear();
-
-      // CovidFaelle_GKZ.csv bezirke durch Newlines getrennt
-      var bezirke = storage.split('\n');
-      var coordinates = [[47.51192,16.39530],[46.74337,13.83628],[48.33653,15.74331],[48.25269,14.00175 ],[47.79940,13.04400 ],[47.20891,15.21711 ],[47.22132,11.30193 ],[47.22757,9.89605 ],[ 48.19231,16.37136]];
-      var maxValue = 0;
-      var value = 0;
-      var nextBiggerScale = 0;
-      maxValue = ImpfungComponent.calculateMax(dataID,bezirke);
-      nextBiggerScale = ImpfungComponent.calculateNextBiggerScale(maxValue);
-      tableDataBundesland = [];
-      for (var i = 0; i < bezirke.length-3; i++){
-        var bezirk = bezirke[i+1].split(';');
-        value = ImpfungComponent.calculateValue(dataID,bezirk);
-        // Scale to max
-        var value_scaled = (value/100*(400/(nextBiggerScale/100)));
-        //this.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[0],value);
-        ImpfungComponent.visualizeEntry(coordinates[i][0],coordinates[i][1],value_scaled,bezirk[i],value);
-        tableDataBundesland.push({name: bezirk[i], count: Math.ceil(value)});
-      }
-      MapService.setMaxValue(nextBiggerScale,maxValue);
-      const data = tableDataBundesland.slice();
-      ImpfungComponent.sortedData = data.sort((a, b) => {
-        return ImpfungComponent.compare(a.count, b.count, false);
+    var bezirke = storage.split('\n');
+    var bundeslaender = [];
+    for(var i = bezirke.length-1; i >= 0; i--) {
+      var bezirk = bezirke[i].split(';');
+      var tmp = false;
+      bundeslaender.forEach(element => {
+        if (element.id == bezirk[1]){
+          tmp = true;
+        }
       });
-      this.table.renderRows();
-      document.getElementById("date").innerHTML = "Stand: "+bezirke[bezirke.length-1].split(';')[dataID];
+      if(!tmp && 1 <= bezirk[1] && bezirk[1] <= 9){
+        bundeslaender.push({name: bezirk[3],id: bezirk[1],auslieferungen: bezirk[4], auslieferungenpro100: bezirk[5], bestellungen: bezirk[6], bestellungenpro100: bezirk[7]});
+      }
+      if (bundeslaender.length >= 9) {
+        break;
+      }
+    }
+    var maxValue = 0;
+    bundeslaender.forEach(element => {
+      var value = 0;
+      if (dataID == 0){
+        value = element.auslieferungen;
+      } else if (dataID == 1) {
+        value = element.auslieferungenpro100;
+      } else if (dataID == 2) {
+        value = element.bestellungen;
+      } else if (dataID == 3) {
+        value = element.bestellungenpro100;
+      }
+      if (maxValue < element.auslieferungen){
+        maxValue = ImpfungComponent.calculateNextBiggerScale(value);
+      }
+    });
+
+    var b_coordinates = [];
+    b_coordinates.push({name: 'Salzburg', x: 47.798135, y: 13.046481});
+    b_coordinates.push({name: 'Oberösterreich', x: 48.305908, y: 14.286198});
+    b_coordinates.push({name: 'Tirol', x: 47.26543, y: 11.392769});
+    b_coordinates.push({name: 'Steiermark', x: 47.070868, y: 15.438279});
+    b_coordinates.push({name: 'Burgenland', x: 47.838758, y: 16.536216});
+    b_coordinates.push({name: 'Niederösterreich', x: 48.193315, y: 15.619872});
+    b_coordinates.push({name: 'Wien', x: 48.208354, y: 16.372504});
+    b_coordinates.push({name: 'Kärnten', x: 46.622816, y: 14.30796});
+    b_coordinates.push({name: 'Vorarlberg', x: 47.502578, y: 9.747292});
+
+    for (var i = 0; i < bundeslaender.length; i++) {
+      var corX = 0;
+      var corY = 0;
+      for (var j = 0; j < b_coordinates.length; j++) {
+        if (b_coordinates[j].name == bundeslaender[i].name){
+          corX = b_coordinates[j].x;
+          corY = b_coordinates[j].y;
+          break;
+        }
+      }
+      var value = 0;
+      if (dataID == 0){
+        value = bundeslaender[i].auslieferungen;
+      } else if (dataID == 1) {
+        value = bundeslaender[i].auslieferungenpro100;
+      } else if (dataID == 2) {
+        value = bundeslaender[i].bestellungen;
+      } else if (dataID == 3) {
+        value = bundeslaender[i].bestellungenpro100;
+      }
+      var value_scaled = (value/100*(400/(maxValue/100)));
+      ImpfungComponent.visualizeEntry(corX,corY,value_scaled,bundeslaender[i].name,value);
+    }
+    MapService.setMaxValue(maxValue,[]);
+    tableData = [];
+    for (var i = 0; i < bundeslaender.length; i++){
+      var value = 0;
+      if (dataID == 0){
+        value = bundeslaender[i].auslieferungen;
+      } else if (dataID == 1) {
+        value = bundeslaender[i].auslieferungenpro100;
+      } else if (dataID == 2) {
+        value = bundeslaender[i].bestellungen;
+      } else if (dataID == 3) {
+        value = bundeslaender[i].bestellungenpro100;
+      }
+      tableData.push({name: bundeslaender[i].name,count: Math.ceil(value)});
+    }
+    ImpfungComponent.sortedData = tableData.slice().sort((a, b) => {
+      return ImpfungComponent.compare(a.count, b.count, false);
+    });
+    this.table.renderRows();
   }
 
   static changeTable(tmpSort: number){
-    ImpfungComponent.sortedData = tableDataBundesland.sort((a, b) => {
+    ImpfungComponent.sortedData = tableData.sort((a, b) => {
       return ImpfungComponent.compare(a.count, b.count, false);
     });
   }
 
   sortData(sort: Sort) {
-    var data = tableDataBundesland.slice();
+    var data = tableData.slice();
     if (!sort.active || sort.direction === '') {
       ImpfungComponent.sortedData = data;
       return;
@@ -238,30 +366,6 @@ export class ImpfungComponent implements OnInit {
     return (maxValue-(maxValue%100000)+100000);
   }
 
-  static calculateValue(dataID,bezirk){
-    // [0] Bundeslandname, [1] Auslieferungen, [2] AuslieferungenPro100, [3] Bestellungen, [4] BestellungenPro100, [5] Bevölkerung
-    if (dataID == 2){
-      return (bezirk[1]/bezirk[5]*100);
-    }
-    if (dataID == 4){
-      return (bezirk[3]/bezirk[5]*100);
-    }
-    return parseInt(bezirk[dataID],10);
-  }
-
-  static calculateMax(dataID,bezirke){
-    var maxValue = 0;
-    var value = 0;
-    for (var i = 1; i < bezirke.length-2; i++){
-      var bezirk = bezirke[i].split(';');
-      value = this.calculateValue(dataID,bezirk);
-      if (maxValue < value){
-          maxValue = value;
-      }
-    }
-    return maxValue;
-  }
-
   static visualizeEntry(lat,long,height,name,value){
       let m_coronaData = new THREE.MeshLambertMaterial( {color: 0x2194ce, transparent: true, opacity: 0.7, emissive: 0x2194ce} );
       if (height < 1){
@@ -275,7 +379,7 @@ export class ImpfungComponent implements OnInit {
       cube.position.z = height/2;
       cube.position.y = lat * factor - deltaY;
       cube.position.x = long * factor - deltaX;
-      cube.layers.set(2);
+      cube.layers.set(3);
       cube.userData.name = name;
       cube.userData.value = Math.floor(value*100)/100;
       RendererComponent.addBundesland(cube);
@@ -293,38 +397,61 @@ export class ImpfungComponent implements OnInit {
   // Wählt Datentyp aus und schaut ob Scale gesetzt ist, bzw schaltet Scale disable.
   selectData(event) {
     this.selectedData = event.value;
-    if (this.selectedData == '5'){
-      this.disabled = true;
-    } else {
-      this.disabled = false;
-    }
     if (!this.disabled && this.checkScale){
-      if (this.selectedData == '1'){
-        this.visualizeData(2);
-      } else if (this.selectedData == '3'){
-        this.visualizeData(4);
+      if (this.selectedData == '0'){
+        if (this.visual_particle){
+          this.createParticle(1);
+        } else {
+          this.visualizeData(1);
+        }
+      } else if (this.selectedData == '2'){
+        if (this.visual_particle){
+          this.createParticle(3);
+        } else {
+          this.visualizeData(3);
+        }
       } else {
         console.log("Error: selectData...");
       }
     } else {
-      this.visualizeData(this.selectedData);
+      if (this.visual_particle){
+        this.createParticle(this.selectedData);
+      } else {
+        this.visualizeData(this.selectedData);
+      }
     }
   }
 
   // Check Scale und welcher Datensatz gewählt wurde, keine Rechnung beim 2 (Bevölkerung)
   scaleTo100000(event){
     this.checkScale = event.checked;
-    if (this.selectedData == '1' || this.selectedData == '2'){
+    if (this.selectedData == '0' || this.selectedData == '1'){
       if (event.checked){
-        this.visualizeData(2);
+        if (this.visual_particle){
+          this.createParticle(1);
+        } else {
+          this.visualizeData(1);
+        }
       } else {
-        this.visualizeData(1);
+        if (this.visual_particle){
+          this.createParticle(0);
+        } else {
+          this.visualizeData(0);
+        }
       }
-    } else if (this.selectedData == '3' || this.selectedData == '4'){
+    } else if (this.selectedData == '2' || this.selectedData == '3'){
       if (event.checked){
-        this.visualizeData(4);
+        if (this.visual_particle){
+          this.createParticle(3);
+        } else {
+          this.visualizeData(3);
+        }
       } else {
-        this.visualizeData(3);
+        if (this.visual_particle){
+          this.createParticle(2);
+        } else {
+          this.visualizeData(2);
+        }
       }
     }
   }

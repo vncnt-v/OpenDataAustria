@@ -46,7 +46,7 @@ export class BadegewaesserComponent implements OnInit {
       this.visual_periodic = true;
     } else {
       this.visual_map = true;
-      this.renderer.start();
+      this.renderer.start(false);
     }
     this.getData().subscribe(data =>
       this.saveData(data)

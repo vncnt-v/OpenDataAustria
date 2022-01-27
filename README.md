@@ -1,17 +1,33 @@
 # OpenDataAustria
 
 ### Front-End
-##### SetUp
 ```sh
 cd Front-End
-npm install
-ng serve --open
 ```
-
-### Back-End
 ##### SetUp
 ```sh
-cd Back-End
 npm install
+```
+##### Run
+```sh
+ng serve --open
+```
+##### Build
+```sh
+ng build
+```
+Files in Front-End/dist/
+
+
+### Back-End
+```sh
+cd Back-End
+```
+##### SetUp
+```sh
+npm install
+```
+##### Run
+```sh
 npm start
 ```

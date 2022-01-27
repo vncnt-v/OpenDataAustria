@@ -1,14 +1,18 @@
 {
+    "/katalog-item": {
+        "target": "http://localhost:8000",
+        "secure": false
+    },
+    "/open-data-wfs-katalog": {
+        "target": "http://localhost:8000",
+        "secure": false
+    },
+    "/open-data-wfs-search": {
+        "target": "http://localhost:8000",
+        "secure": false
+    },
     "/map-data": {
         "target": "http://localhost:8000",
         "secure": false
-    },
-    "/corona-data": {
-        "target": "http://localhost:8000",
-        "secure": false
-    },
-    "/impfung-data": {
-        "target": "http://localhost:8000",
-        "secure": false
     }
-  }
+}

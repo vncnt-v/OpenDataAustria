@@ -2,8 +2,8 @@ module.exports = {
     getData: function (writer) {
         var http = require('https');
         var options = {
-            host: 'covid19-dashboard.ages.at',
-            path: '/data/CovidFaelle_GKZ.csv'
+            host: 'www.data.gv.at',
+            path: '/katalog/api/3/action/package_search?q=json%20(wfs)&rows=500'     
         }
         var request = http.request(options, function (res) {
             var data = '';
@@ -17,7 +17,6 @@ module.exports = {
         request.on('error', function (e) {
             console.log(e.message);
         });
-        
         request.end();
     }
 };

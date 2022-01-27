@@ -1,21 +1,20 @@
-#info-box{
-    display: none;
-    position: fixed;
-    background-color: white;
-    border-radius: 3px;
-    padding-left: 15px;
-    padding-right: 15px;
-    padding-top: 5px;
-    padding-bottom: 3px;
-    min-width: 5em;
-    top: 500px;
-    left: 1400px;
+.home-button {
+    background-color: #222222;
+    position: absolute;
+    right: 1em;
+    bottom: 1em;
+    z-index: 150;
+    height: 50px;
+    width: 100px;
+    border-radius: 25px;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
 }
-#info-text{
-    font-size: 15px;
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    height: 100%;
-    width: 100%;
-    text-align: center;
-    margin: 0;
+.home-button p {
+    color: rgb(161, 161, 161);
+    font-size: 12pt;
+    margin-bottom: 0;
 }

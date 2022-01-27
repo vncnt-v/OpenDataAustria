@@ -1,20 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { MapService } from '../services/map.service';
 import * as THREE from 'three';
-import { CoronaComponent } from '../corona/corona.component';
+import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
+var deltaX = 730;
+var deltaY = 2600;
+var factor = 55;
 
 @Component({
   selector: 'app-renderer',
   templateUrl: './renderer.component.html',
   styleUrls: ['./renderer.component.css']
 })
-export class RendererComponent {
+export class RendererComponent implements OnInit {
+  url: string;
+  private sub: any;
+
   module: string;
   // REQUEST MAP
-  constructor(public map: MapService) { }
+  constructor(public map: MapService, private route: ActivatedRoute, private http: HttpClient) { }
   // THREE JS Main Scene
   static scene;
+  static entries = new THREE.Group;
+  static noScaleEntries = new THREE.Group;
   // Bundesländer Group
   static bundeslaenderGroup = new THREE.Group;
   // Bezirke Group
@@ -24,27 +34,20 @@ export class RendererComponent {
   static selected = false;
   static selectedBundesland = 0;
 
-  start(scala) {
+  ngOnInit(): void {
+    this.sub = this.route.params.subscribe(params => {
+      this.url = params['url'];
+      this.start();
+    });
+  }
+
+  start() {
     // Create new THREE JS Scene
     RendererComponent.scene = new THREE.Scene();
-
     RendererComponent.bezirkDataGroup.visible = false;
 
-    // Raycast Bundesländer 
-    const raycaster = new THREE.Raycaster();
-    raycaster.layers.set(2);
-    var INTERSECTED;
-    // Raycast Bezirke
-    const raycasterData = new THREE.Raycaster();
-    raycasterData.layers.set(3);
-    var INTERSECTEDDATA;
-
-    // Get Mouse Position
-    const mouse = new THREE.Vector2();
-    const mouse_drag_pos = new THREE.Vector2();
-    const mouse_r = new THREE.Vector2();
-    mouse.x = 0;
-    mouse.y = 0;
+    // Obj Size Stay Same
+    var scaleVector = new THREE.Vector3();
 
     // Set Camera
     var camera = new THREE.PerspectiveCamera( 50, window.innerWidth/window.innerHeight, 0.1, 10000);
@@ -72,166 +75,15 @@ export class RendererComponent {
     // Update function
     var render = function(){
       controls.update();
-      
-      var bezirkHit = false;      
-      // Raycast Bezirke
-      raycasterData.setFromCamera( mouse, camera );
-      const intersectsData = raycasterData.intersectObjects( RendererComponent.scene.children, true );
-      for (var i = 0; i < intersectsData.length && i < 10; i++){
-        if (intersectsData[i] && intersectsData[i].object.visible == true) {
-          bezirkHit = true;
-          if (INTERSECTEDDATA != intersectsData[i].object){
-            if ( INTERSECTEDDATA ) INTERSECTEDDATA.material.emissive.setHex( INTERSECTEDDATA.currentHex );
-            if (document.getElementById('info-text') != null){
-              
-              INTERSECTEDDATA = intersectsData[i].object;
-              document.getElementById('info-text').innerHTML = String(intersectsData[i].object.userData.name+"<br>"+Math.ceil(intersectsData[i].object.userData.value));
-              document.getElementById('info-box').style.display = "block";
-              document.getElementById('info-box').style.top = String(mouse_r.y)+"px";
-              document.getElementById('info-box').style.left = String(mouse_r.x+10)+"px";
-              INTERSECTEDDATA.currentHex = INTERSECTEDDATA.material.emissive.getHex();
-              INTERSECTEDDATA.material.emissive.setHex( 0xff0000 );
-            }
-          }
-          break;
-        }
-      }
-      if (!bezirkHit){
-        if ( INTERSECTEDDATA ) INTERSECTEDDATA.material.emissive.setHex( INTERSECTEDDATA.currentHex );
-        INTERSECTEDDATA = null;
-        if (document.getElementById('info-text') != null){
-          document.getElementById('info-box').style.display = "none";
-        }
-      }
-
-      // Raycast Bundesländer
-      if (!bezirkHit) {
-        raycaster.setFromCamera( mouse, camera );
-        const intersects = raycaster.intersectObjects( RendererComponent.scene.children, true );
-        if (intersects.length > 0 && intersects[0]) {
-          if ( INTERSECTED != intersects[ 0 ].object && intersects[ 0 ].object.visible == true) {
-            if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-            INTERSECTED = intersects[ 0 ].object;
-            INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-            INTERSECTED.material.color.setHex( 0x800000 );
-          }
-        } else {
-          if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-          INTERSECTED = null;
-        }
-      } else {
-        if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
-        INTERSECTED = null;
-      }
-      
+      var scaleFactor = 80;
+      RendererComponent.entries.children.forEach(function(elem) {
+        var scale = scaleVector.subVectors(elem.position, camera.position).length() / scaleFactor;
+        elem.scale.set(scale,scale,1)
+      });
       // THREE JS Components
       requestAnimationFrame(render);
       renderer.render(RendererComponent.scene,camera);
     }
-    
-    // Add Click Event
-    var canvas_model = document.getElementsByTagName('canvas');
-    if (canvas_model.length > 0){
-      
-      canvas_model[0].addEventListener('pointerdown', function(event){
-        var bounds = canvas_model[0].getBoundingClientRect();
-        mouse_drag_pos.x = ((event.clientX - bounds.left) / canvas_model[0].clientWidth ) * 2 - 1;
-        mouse_drag_pos.y = - ((event.clientY - bounds.top) / canvas_model[0].clientHeight ) * 2 + 1;
-      }, false)
-      canvas_model[0].addEventListener('click', function(event){
-        // Get Mouse Position
-        var bounds = canvas_model[0].getBoundingClientRect();
-        mouse.x = ( (event.clientX - bounds.left) / canvas_model[0].clientWidth ) * 2 - 1;
-        mouse.y = - ( (event.clientY - bounds.top) / canvas_model[0].clientHeight ) * 2 + 1;
-        if (mouse.x != mouse_drag_pos.x && mouse.y != mouse_drag_pos.y) {
-          return;
-        }
-        // Raycast Bundesland
-        raycaster.setFromCamera( mouse, camera );
-        var intersects = raycaster.intersectObjects(RendererComponent.scene.children, true);
-        if (intersects.length > 0) {
-          // Check if show Bundesland or show all
-          if (RendererComponent.bezirkDataGroup.children.length <= 0){
-            return;
-          }
-          if(!RendererComponent.selected){
-            RendererComponent.bundeslandDataGroup.visible = false;
-            RendererComponent.bezirkDataGroup.visible = true;
-            RendererComponent.bundeslandDataGroup.children.forEach(item => {
-              item.visible = false;
-            });
-            // Check if Bezirk Obj id == raycasted value
-            RendererComponent.bezirkDataGroup.children.forEach(item => {
-              if(intersects[0].object.userData.value == item.userData.id){
-                item.visible = true;
-              } else {
-                item.visible = false;
-              }
-            });
-            // Check if Bundesland Obj id == raycasted value
-            RendererComponent.bundeslaenderGroup.children.forEach(item => {
-              if(intersects[0].object.userData.value == item.userData.value){
-                item.visible = true;
-              } else {
-                item.visible = false;
-              }
-            });
-            RendererComponent.selectedBundesland = intersects[0].object.userData.value;
-            RendererComponent.selected = true;
-            CoronaComponent.changeTable(intersects[0].object.userData.value);
-            MapService.setBundeslandScala(intersects[0].object.userData.value);
-            document.getElementById('show-all-button').classList.remove("hide");
-          } else {
-            var tmpBool = false;
-            // Check if clicked selected Bundesland to show all
-            RendererComponent.bundeslaenderGroup.children.forEach(item => {
-              if (intersects[0].object.userData.value == item.userData.value){
-                if (item.visible == true){
-                  tmpBool = true;
-                }
-              }
-            });
-            // Show all Bundeslaender
-            if (tmpBool){
-              CoronaComponent.changeTable(-1);
-              MapService.setMaxValueAll();
-              RendererComponent.bezirkDataGroup.visible = false;
-              RendererComponent.bundeslandDataGroup.visible = true;
-              RendererComponent.bundeslaenderGroup.children.forEach(item => {
-                item.visible = true;
-              });
-              RendererComponent.bezirkDataGroup.children.forEach(item => {
-                item.visible = false;
-              });
-              RendererComponent.bundeslandDataGroup.children.forEach(item => {
-                item.visible = true;
-              });
-              RendererComponent.selected = false;
-              document.getElementById('show-all-button').classList.add("hide");
-            }
-          }
-        }
-      }, false)
-    }
-
-    // Add click event show all btn
-    document.getElementById('show-all-button').addEventListener('click', function(event){
-      CoronaComponent.changeTable(-1);
-      MapService.setMaxValueAll();
-      RendererComponent.bezirkDataGroup.visible = false;
-      RendererComponent.bundeslandDataGroup.visible = true;
-      RendererComponent.bundeslaenderGroup.children.forEach(item => {
-        item.visible = true;
-      });
-      RendererComponent.bezirkDataGroup.children.forEach(item => {
-        item.visible = false;
-      });
-      RendererComponent.bundeslandDataGroup.children.forEach(item => {
-        item.visible = true;
-      });
-      RendererComponent.selected = false;
-      document.getElementById('show-all-button').classList.add("hide");
-    }, false);
 
     // THREE JS Resize function
     window.addEventListener('resize',() => {
@@ -239,59 +91,151 @@ export class RendererComponent {
         camera.aspect = window.innerWidth/window.innerHeight;
         camera.updateProjectionMatrix();
     })
-    
-    // Add mousemove event
-    window.addEventListener( 'mousemove',(event) => {
-      event.preventDefault();
-      mouse_r.x = event.clientX;
-      mouse_r.y = event.clientY;
-      mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    })
 
     render();
-    if (scala){
-      this.map.setUp(true);
-    } else {
-      this.map.setUp(false);
-    }
-    
+    this.map.setUp();
     RendererComponent.scene.add(RendererComponent.bundeslaenderGroup);
     RendererComponent.scene.add(RendererComponent.bundeslandDataGroup);
-    RendererComponent.scene.add(RendererComponent.bezirkDataGroup);
+    RendererComponent.scene.add(RendererComponent.entries);
+    RendererComponent.entries.clear();
+    RendererComponent.scene.add(RendererComponent.noScaleEntries);
+    RendererComponent.noScaleEntries.clear();
+    //this.http.get('/nodejs/katalog-item?url='+ this.url, {responseType: 'text'}).subscribe(data =>
+    this.http.get('/katalog-item?url='+ this.url, {responseType: 'text'}).subscribe(data =>
+      this.mapper(data)
+    );
   }
 
-  static showAll() {
-    RendererComponent.bezirkDataGroup.visible = false;
-      RendererComponent.bundeslandDataGroup.visible = true;
-      RendererComponent.bundeslaenderGroup.children.forEach(item => {
-        item.visible = true;
-      });
-      RendererComponent.bezirkDataGroup.children.forEach(item => {
-        item.visible = false;
-      });
-      RendererComponent.bundeslandDataGroup.children.forEach(item => {
-        item.visible = true;
-      });
-      RendererComponent.selected = false;
-      document.getElementById('show-all-button').classList.add("hide");
+  IsJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
   }
-  static addBezirk(entry: THREE.Mesh){
-    if (RendererComponent.selected) {
-      if (entry.userData.id != RendererComponent.selectedBundesland){
-        entry.visible = false;
+
+  mapper(data) {
+    if (this.IsJsonString(data)) {
+      this.mapJson(data);
+    }
+  }
+
+  mapJson(data){
+    var counter = 0;
+    var json = JSON.parse(data);
+    json['features'].forEach(element => {
+      if (element['geometry']['type'] == "Point") {
+        this.spawnPoint(element['geometry']['coordinates'][0],element['geometry']['coordinates'][1]);
+        console.log(element['geometry']['coordinates'][0],element['geometry']['coordinates'][1]);
+      } else if (element['geometry']['type'] == "MultiLineString") {
+        this.spawnMultiLineString(element['geometry']['coordinates']);
+      } else if (element['geometry']['type'] == "Polygon") {
+        this.spawnPolygon(element['geometry']['coordinates']);
+      } else if (element['geometry']['type'] == "MultiPolygon") {
+        this.spawnMultiPolygon(element['geometry']['coordinates']);
+      } else if (element['geometry']['type'] == "LineString") {
+        this.spawnLineString(element['geometry']['coordinates']);
       } else {
-        entry.visible = true;
+        console.log(element);
       }
-    } else {
-      entry.visible = false;
-    }
-    RendererComponent.bezirkDataGroup.add(entry);
+    });
+    console.log("finish");
   }
-  static addBundesland(entry: THREE.Mesh){
-    if (RendererComponent.selected) {
-      entry.visible = false;
-    }
-    RendererComponent.bundeslandDataGroup.add(entry);
+
+  spawnPoint(posX, posY) {
+    let m_color = new THREE.MeshLambertMaterial( {color: 0x0221F7, transparent: true, opacity: 0.7, emissive: 0x0221F7} );
+    var geometry = new THREE.BoxGeometry( .5, .5, .5);
+    var cube = new THREE.Mesh( geometry, m_color );
+    cube.position.z = 1;
+    cube.position.y = posY * factor - deltaY;
+    cube.position.x = posX * factor - deltaX;
+    RendererComponent.entries.add(cube);
+  }
+
+  spawnLineString(array) {
+    const material = new THREE.LineBasicMaterial({ color: 0x0221F7, transparent: true, opacity: 0.7 });
+    const points = [];
+    array.forEach(point => {
+      points.push( new THREE.Vector3( point[0] * factor - deltaX, point[1] * factor - deltaY, 1 ) );
+    });
+    const geometry = new THREE.BufferGeometry().setFromPoints( points );
+    const line = new THREE.Line( geometry, material );
+    RendererComponent.noScaleEntries.add(line);
+  }
+
+  spawnMultiLineString(array) {
+    const material = new THREE.LineBasicMaterial({ color: 0x0221F7, transparent: true, opacity: 0.7 });
+    array.forEach(element => {
+      const points = [];
+      element.forEach(point => {
+        points.push( new THREE.Vector3( point[0] * factor - deltaX, point[1] * factor - deltaY, 1 ) );
+      });
+      const geometry = new THREE.BufferGeometry().setFromPoints( points );
+      const line = new THREE.Line( geometry, material );
+      RendererComponent.noScaleEntries.add(line);
+    });
+  }
+
+  spawnPolygon(array) {
+    var material = [];
+    material.push (new THREE.MeshBasicMaterial({ color: 0xCB4335 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x76448A }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x6C3483 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x1F618D }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x2874A6 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x148F77 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x117A65 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x1E8449 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x239B56 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xB7950B }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xB9770E }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xAF601A }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xA04000 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xB3B6B7 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x909497 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x717D7E }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x616A6B }));
+    array.forEach(element => {
+      var shapePoints = [];
+      element.forEach(point => {
+        shapePoints.push( new THREE.Vector3(point[0] * factor - deltaX, point[1] * factor - deltaY, 1 ) );
+      });
+      var geomShape = new THREE.ShapeBufferGeometry(new THREE.Shape(shapePoints));
+      const shape = new THREE.Mesh( geomShape, material[Math.floor(Math.random()*material.length)]);
+      RendererComponent.noScaleEntries.add(shape);
+    });
+  }
+
+  spawnMultiPolygon(array) {
+    var material = [];
+    material.push (new THREE.MeshBasicMaterial({ color: 0xCB4335 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x76448A }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x6C3483 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x1F618D }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x2874A6 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x148F77 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x117A65 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x1E8449 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x239B56 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xB7950B }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xB9770E }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xAF601A }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xA04000 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0xB3B6B7 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x909497 }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x717D7E }));
+    material.push (new THREE.MeshBasicMaterial({ color: 0x616A6B }));
+    array.forEach(element => {
+      var shapePoints = [];
+      element.forEach(polygon => {
+        polygon.forEach(point => {
+          shapePoints.push( new THREE.Vector3(point[0] * factor - deltaX, point[1] * factor - deltaY, 1 ) );
+        });
+      });
+      var geomShape = new THREE.ShapeBufferGeometry(new THREE.Shape(shapePoints));
+      const shape = new THREE.Mesh( geomShape, material[Math.floor(Math.random()*material.length)]);
+      RendererComponent.noScaleEntries.add(shape);
+    });
   }
 }
